@@ -1,23 +1,29 @@
 package com.trafi.istorijos;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.util.LongSparseArray;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.util.Linkify;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerView;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -37,7 +43,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarkerViewClickListener {
 
     private static final int PERMISSIONS_LOCATION = 0;
 
@@ -57,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     boolean zoomedIn;
     boolean showingStory;
 
+    LongSparseArray<Story> markerIdToStory = new LongSparseArray<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
                 map.getUiSettings().setTiltGesturesEnabled(false);
                 map.getUiSettings().setRotateGesturesEnabled(false);
+
+                map.getMarkerViewManager().setOnMarkerViewClickListener(MainActivity.this);
 
                 // Check if user has granted location permission
                 if (!locationServices.areLocationPermissionsGranted()) {
@@ -127,17 +137,18 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<List<Story>> call, Response<List<Story>> response) {
                     if (response.isSuccessful()) {
-                        for (Story story : response.body()) {
-                            map.addMarker(new MarkerViewOptions()
+                        List<Story> stories = response.body();
+                        for (Story story : stories) {
+                            MarkerView marker = map.addMarker(new MarkerViewOptions()
                                     .icon(IconFactory.getInstance(MainActivity.this)
                                             .fromResource(R.drawable.dot))
                                     .flat(true)
 //                        .alpha((float) Math.max(0, 1 - latLng.distanceTo(new LatLng(location.getLatitude(), location.getLongitude())) / 100))
                                     .position(new LatLng(story.latitude, story.longitude)));
-                        }
 
-                        if (response.body().size() > 0) {
-                            showStory(response.body().get(0));
+                            marker.setAlpha(0.5f);
+
+                            markerIdToStory.put(marker.getId(), story);
                         }
                     }
                 }
@@ -170,30 +181,62 @@ public class MainActivity extends AppCompatActivity {
                         storyImage.setScaleY(0.8f);
 
                         storyImage.animate().scaleX(1).scaleY(1)
-                                .setInterpolator(new OvershootInterpolator()).start();
+                                .setInterpolator(new OvershootInterpolator())
+                                .setListener(null)
+                                .start();
 
                         storyText.setAlpha(0);
                         storyText.setTranslationY(64);
 
                         storyText.animate().alpha(1).translationY(0)
-                                .setInterpolator(new DecelerateInterpolator()).start();
+                                .setInterpolator(new DecelerateInterpolator())
+                                .setListener(null)
+                                .start();
                         return true;
                     }
                 });
 
         closeButton.setVisibility(View.VISIBLE);
         closeButton.setAlpha(0);
-        closeButton.animate().alpha(1);
+        closeButton.animate().setListener(null).alpha(1);
 
         showingStory = true;
     }
 
     @OnClick(R.id.close_button)
     void closeStory() {
-        storyContainer.setVisibility(View.GONE);
-        closeButton.setVisibility(View.INVISIBLE);
+        closeButton.animate().alpha(0).setListener(
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        closeButton.setVisibility(View.INVISIBLE);
+                    }
+                });
+
+        storyImage.animate().scaleX(0f).scaleY(0f)
+                .setInterpolator(new AccelerateInterpolator());
+        storyText.animate().alpha(0).translationY(64)
+                .setInterpolator(new AccelerateInterpolator())
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        storyContainer.setVisibility(View.GONE);
+                    }
+                });
+
         map.setMyLocationEnabled(true);
         showingStory = false;
+    }
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker, @NonNull View view,
+                                 @NonNull MapboxMap.MarkerViewAdapter adapter) {
+        Story story = markerIdToStory.get(marker.getId());
+        if (null != story) {
+            showStory(story);
+            return true;
+        }
+        return false;
     }
 
     @Override
