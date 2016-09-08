@@ -34,6 +34,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     boolean zoomedIn;
     boolean showingStory;
 
+    List<MarkerView> storyMarkers = new ArrayList<>();
     LongSparseArray<Story> markerIdToStory = new LongSparseArray<>();
 
     @Override
@@ -112,11 +114,11 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     private void enableLocation(boolean enabled) {
         if (enabled) {
-            setMapCameraPosition(locationServices.getLastLocation());
+            onUserLocationUpdated(locationServices.getLastLocation());
             locationServices.addLocationListener(new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    setMapCameraPosition(location);
+                    onUserLocationUpdated(location);
                 }
             });
         }
@@ -124,41 +126,51 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         map.setMyLocationEnabled(enabled);
     }
 
-    private void setMapCameraPosition(@Nullable Location location) {
-        if (location != null && !zoomedIn) {
-            // Move the map camera to where the user location is
-            map.setCameraPosition(new CameraPosition.Builder()
-                    .target(new LatLng(location))
-                    .zoom(16)
-                    .build());
-            zoomedIn = true;
+    private float getAlpha(LatLng markerPosition, Location location) {
+        return (float) Math.max(0,
+                1 - markerPosition.distanceTo(
+                        new LatLng(location.getLatitude(), location.getLongitude())) / 1000);
+    }
 
-            Api.getStoriesService().listStories().enqueue(new Callback<List<Story>>() {
-                @Override
-                public void onResponse(Call<List<Story>> call, Response<List<Story>> response) {
-                    if (response.isSuccessful()) {
-                        List<Story> stories = response.body();
-                        for (Story story : stories) {
-                            MarkerView marker = map.addMarker(new MarkerViewOptions()
-                                    .icon(IconFactory.getInstance(MainActivity.this)
-                                            .fromResource(R.drawable.dot))
-                                    .flat(true)
-//                        .alpha((float) Math.max(0, 1 - latLng.distanceTo(new LatLng(location.getLatitude(), location.getLongitude())) / 100))
-                                    .position(new LatLng(story.latitude, story.longitude)));
+    private void onUserLocationUpdated(@Nullable final Location location) {
+        if (location != null) {
+            if (zoomedIn) {
+                for (MarkerView marker : storyMarkers) {
+                    marker.setAlpha(getAlpha(marker.getPosition(), location));
+                }
+            } else {
+                // Move the map camera to where the user location is
+                map.setCameraPosition(new CameraPosition.Builder()
+                        .target(new LatLng(location))
+                        .zoom(16)
+                        .build());
+                zoomedIn = true;
 
-                            marker.setAlpha(0.5f);
+                Api.getStoriesService().listStories().enqueue(new Callback<List<Story>>() {
+                    @Override
+                    public void onResponse(Call<List<Story>> call, Response<List<Story>> response) {
+                        if (response.isSuccessful()) {
+                            List<Story> stories = response.body();
+                            for (Story story : stories) {
+                                MarkerView marker = map.addMarker(new MarkerViewOptions()
+                                        .icon(IconFactory.getInstance(MainActivity.this)
+                                                .fromResource(R.drawable.dot))
+                                        .flat(true)
+                                        .position(new LatLng(story.latitude, story.longitude)));
 
-                            markerIdToStory.put(marker.getId(), story);
+                                marker.setAlpha(getAlpha(marker.getPosition(), location));
+
+                                markerIdToStory.put(marker.getId(), story);
+                                storyMarkers.add(marker);
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<List<Story>> call, Throwable t) {
-                }
-            });
-
-
+                    @Override
+                    public void onFailure(Call<List<Story>> call, Throwable t) {
+                    }
+                });
+            }
         }
     }
 
