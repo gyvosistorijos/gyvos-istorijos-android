@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         Picasso.with(this).load(story.url).fit().centerCrop().into(storyImage);
         //noinspection deprecation
         storyText.setText(Html.fromHtml(story.text));
-        storyText.setMovementMethod(LinkMovementMethod.getInstance());
+        Linkify.addLinks(storyText, Linkify.WEB_URLS);
 
         storyContainer.setVisibility(View.VISIBLE);
         storyContainer.getViewTreeObserver().addOnPreDrawListener(
