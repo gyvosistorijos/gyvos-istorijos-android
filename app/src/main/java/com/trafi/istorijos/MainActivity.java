@@ -19,9 +19,11 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,18 +33,6 @@ public class MainActivity extends AppCompatActivity {
     MapboxMap map;
     LocationServices locationServices;
     boolean zoomedIn;
-
-    static List<LatLng> coordinates;
-
-    static {
-        Random rand = new Random();
-        coordinates = new ArrayList<>();
-        for (int i = 0; i < 16; i++) {
-            coordinates.add(new LatLng(
-                    54.6872 + 2 * (rand.nextDouble() - 0.5) * 0.01,
-                    25.2797 + 2 * (rand.nextDouble() - 0.5) * 0.01));
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 map = mapboxMap;
+
+                map.getUiSettings().setTiltGesturesEnabled(false);
+                map.getUiSettings().setRotateGesturesEnabled(false);
 
                 // Check if user has granted location permission
                 if (!locationServices.areLocationPermissionsGranted()) {
@@ -106,14 +99,27 @@ public class MainActivity extends AppCompatActivity {
                     .build());
             zoomedIn = true;
 
-            for (LatLng latLng : coordinates) {
-                map.addMarker(new MarkerViewOptions()
-                        .icon(IconFactory.getInstance(MainActivity.this)
-                                .fromResource(R.drawable.dot))
-                        .flat(true)
+            Api.getStoriesService().listStories().enqueue(new Callback<List<Story>>() {
+                @Override
+                public void onResponse(Call<List<Story>> call, Response<List<Story>> response) {
+                    if (response.isSuccessful()) {
+                        for (Story story : response.body()) {
+                            map.addMarker(new MarkerViewOptions()
+                                    .icon(IconFactory.getInstance(MainActivity.this)
+                                            .fromResource(R.drawable.dot))
+                                    .flat(true)
 //                        .alpha((float) Math.max(0, 1 - latLng.distanceTo(new LatLng(location.getLatitude(), location.getLongitude())) / 100))
-                        .position(latLng));
-            }
+                                    .position(new LatLng(story.latitude, story.longitude)));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<Story>> call, Throwable t) {
+                }
+            });
+
+
         }
     }
 
