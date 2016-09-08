@@ -8,6 +8,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
@@ -18,9 +26,13 @@ import com.mapbox.mapboxsdk.location.LocationServices;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -29,19 +41,31 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_LOCATION = 0;
 
+    @BindView(R.id.map_view)
     MapView mapView;
-    MapboxMap map;
+    @BindView(R.id.scroll_view)
+    View storyContainer;
+    @BindView(R.id.image)
+    ImageView storyImage;
+    @BindView(R.id.text)
+    TextView storyText;
+    @BindView(R.id.close_button)
+    View closeButton;
+
     LocationServices locationServices;
+    MapboxMap map;
     boolean zoomedIn;
+    boolean showingStory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mapView = (MapView) findViewById(R.id.map_view);
-        mapView.onCreate(savedInstanceState);
+        ButterKnife.bind(this);
 
         locationServices = LocationServices.getLocationServices(this);
+
+        mapView.onCreate(savedInstanceState);
 
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -111,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
 //                        .alpha((float) Math.max(0, 1 - latLng.distanceTo(new LatLng(location.getLatitude(), location.getLongitude())) / 100))
                                     .position(new LatLng(story.latitude, story.longitude)));
                         }
+
+                        if (response.body().size() > 0) {
+                            showStory(response.body().get(0));
+                        }
                     }
                 }
 
@@ -120,6 +148,60 @@ public class MainActivity extends AppCompatActivity {
             });
 
 
+        }
+    }
+
+    private void showStory(Story story) {
+        map.setMyLocationEnabled(false);
+
+        Picasso.with(this).load(story.url).fit().centerCrop().into(storyImage);
+        //noinspection deprecation
+        storyText.setText(Html.fromHtml(story.text));
+        storyText.setMovementMethod(LinkMovementMethod.getInstance());
+
+        storyContainer.setVisibility(View.VISIBLE);
+        storyContainer.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        storyContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                        storyImage.setScaleX(0.8f);
+                        storyImage.setScaleY(0.8f);
+
+                        storyImage.animate().scaleX(1).scaleY(1)
+                                .setInterpolator(new OvershootInterpolator()).start();
+
+                        storyText.setAlpha(0);
+                        storyText.setTranslationY(64);
+
+                        storyText.animate().alpha(1).translationY(0)
+                                .setInterpolator(new DecelerateInterpolator()).start();
+                        return true;
+                    }
+                });
+
+        closeButton.setVisibility(View.VISIBLE);
+        closeButton.setAlpha(0);
+        closeButton.animate().alpha(1);
+
+        showingStory = true;
+    }
+
+    @OnClick(R.id.close_button)
+    void closeStory() {
+        storyContainer.setVisibility(View.GONE);
+        closeButton.setVisibility(View.INVISIBLE);
+        map.setMyLocationEnabled(true);
+        showingStory = false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (showingStory) {
+            closeStory();
+        } else {
+            super.onBackPressed();
         }
     }
 

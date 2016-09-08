@@ -5,7 +5,6 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:foreground="@drawable/center_gradient"
     tools:context="com.trafi.istorijos.MainActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
@@ -17,6 +16,63 @@
         mapbox:center_longitude="25.2797"
         mapbox:logo_enabled="false"
         mapbox:style_url="@string/mapbox_map_style_url"
-        mapbox:zoom="11" />
+        mapbox:zoom="11"
+        tools:visibility="gone" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/center_gradient" />
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:paddingBottom="48dp"
+            android:paddingTop="72dp">
+
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:elevation="8dp"
+                tools:background="#f00" />
+
+            <TextView
+                android:id="@+id/text"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="48dp"
+                android:layout_marginRight="48dp"
+                android:layout_marginTop="32dp"
+                android:fontFeatureSettings="onum"
+                android:lineSpacingExtra="6dp"
+                tools:text="I am story, a big beautiful story of love and cookies and DMP." />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <ImageView
+        android:id="@+id/close_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="end"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="12dp"
+        android:src="@drawable/ic_cancel_24dp"
+        android:visibility="invisible"
+        tools:visibility="visible" />
 
 </FrameLayout>
