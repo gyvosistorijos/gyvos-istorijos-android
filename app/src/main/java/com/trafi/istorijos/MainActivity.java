@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationListener;
@@ -16,6 +18,10 @@ import com.mapbox.mapboxsdk.location.LocationServices;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +31,18 @@ public class MainActivity extends AppCompatActivity {
     MapboxMap map;
     LocationServices locationServices;
     boolean zoomedIn;
+
+    static List<LatLng> coordinates;
+
+    static {
+        Random rand = new Random();
+        coordinates = new ArrayList<>();
+        for (int i = 0; i < 16; i++) {
+            coordinates.add(new LatLng(
+                    54.6872 + 2 * (rand.nextDouble() - 0.5) * 0.01,
+                    25.2797 + 2 * (rand.nextDouble() - 0.5) * 0.01));
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +105,15 @@ public class MainActivity extends AppCompatActivity {
                     .zoom(16)
                     .build());
             zoomedIn = true;
+
+            for (LatLng latLng : coordinates) {
+                map.addMarker(new MarkerViewOptions()
+                        .icon(IconFactory.getInstance(MainActivity.this)
+                                .fromResource(R.drawable.dot))
+                        .flat(true)
+//                        .alpha((float) Math.max(0, 1 - latLng.distanceTo(new LatLng(location.getLatitude(), location.getLongitude())) / 100))
+                        .position(latLng));
+            }
         }
     }
 
