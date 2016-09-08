@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:foreground="@drawable/center_gradient"
     tools:context="com.trafi.istorijos.MainActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
@@ -13,6 +14,7 @@
         android:layout_height="match_parent"
         mapbox:center_latitude="54.6872"
         mapbox:center_longitude="25.2797"
-        mapbox:zoom="11"
-        mapbox:style_url="@string/mapbox_map_style_url" />
-</RelativeLayout>
+        mapbox:style_url="@string/mapbox_map_style_url"
+        mapbox:zoom="11" />
+
+</FrameLayout>
