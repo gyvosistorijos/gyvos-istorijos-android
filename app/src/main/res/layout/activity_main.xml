@@ -12,8 +12,10 @@
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        mapbox:attribution_enabled="false"
         mapbox:center_latitude="54.6872"
         mapbox:center_longitude="25.2797"
+        mapbox:logo_enabled="false"
         mapbox:style_url="@string/mapbox_map_style_url"
         mapbox:zoom="11" />
 
