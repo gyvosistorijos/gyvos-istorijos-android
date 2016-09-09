@@ -4,9 +4,13 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +24,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,11 +44,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindDimen;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -63,10 +70,19 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     @BindView(R.id.hide_story_button)
     View hideStoryButton;
 
+    @BindView(R.id.submit_story_container)
+    View submitStoryContainer;
+    @BindView(R.id.submit_story_image)
+    ImageView submitStoryImage;
+    @BindView(R.id.story_edit_text)
+    EditText submitStoryEditText;
+
     @BindView(R.id.show_story_image)
     ImageView showStoryImage;
     @BindView(R.id.show_story_button)
     View showStoryButton;
+    @BindView(R.id.add_story_button)
+    View addStoryButton;
     @BindDimen(R.dimen.image_height)
     int imageHeight;
     @BindDimen(R.dimen.attractor_height_offset)
@@ -79,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     boolean zoomedIn;
     boolean initialized;
     boolean showingStory;
+    boolean addingStory;
 
     List<MarkerView> storyMarkers = new ArrayList<>();
     LongSparseArray<Story> markerIdToStory = new LongSparseArray<>();
@@ -87,6 +104,23 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     Story activeStory;
 
     ValueAnimator showStoryAnimator;
+
+    Handler handler = new Handler();
+
+    double lastLat;
+    double lastLng;
+
+    final Runnable updateGps = new Runnable() {
+        @Override
+        public void run() {
+            Random random = new Random();
+            Location location = new Location("gps");
+            location.setLatitude(54.694680 + 2 * (random.nextDouble() - 0.5) * 0.001);
+            location.setLongitude(25.274590 + 2 * (random.nextDouble() - 0.5) * 0.001);
+            locationServices.onLocationChanged(location);
+            handler.postDelayed(updateGps, 5000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,20 +182,28 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     private void enableLocation(boolean enabled) {
         if (enabled) {
-            onUserLocationUpdated(locationServices.getLastLocation());
+
+            Location location = new Location("gps");
+            location.setLatitude(54.692680);
+            location.setLongitude(25.272590);
+
+//            onUserLocationUpdated(locationServices.getLastLocation());
             locationServices.addLocationListener(new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     onUserLocationUpdated(location);
                 }
             });
+            locationServices.onLocationChanged(location);
+
+            handler.postDelayed(updateGps, 5000);
         }
         // Enable or disable the location layer on the map
         map.setMyLocationEnabled(enabled);
     }
 
     private float getAlpha(LatLng markerPosition, Location location) {
-        return (float) Math.max(0.4,
+        return (float) Math.max(0.5,
                 1 - markerPosition.distanceTo(
                         new LatLng(location.getLatitude(), location.getLongitude())) / 1000);
     }
@@ -170,6 +212,8 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         if (location == null) {
             return;
         }
+        lastLat = location.getLatitude();
+        lastLng = location.getLongitude();
 
         if (!zoomedIn) {
             // Move the map camera to where the user location is
@@ -230,12 +274,12 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
             }
 
             if (null == prevActiveStory && null != activeStory) {
-                if (!showingStory) {
+                if (!showingStory && !addingStory) {
                     showShowStory();
                 }
             } else if (null != prevActiveStory && null == activeStory) {
                 if (showingStory) {
-                    clickHideStory();
+                    clickHideButton();
                 } else {
                     hideShowStory();
                 }
@@ -302,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
                     }
                 });
 
+        addStoryButton.setVisibility(View.INVISIBLE);
         hideStoryButton.setVisibility(View.VISIBLE);
         hideStoryButton.setAlpha(0);
         hideStoryButton.animate().setListener(null).alpha(1);
@@ -309,30 +354,101 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
         showingStory = true;
     }
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    @OnClick(R.id.add_photo_button)
+    void addPhoto() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            submitStoryImage.setImageBitmap(imageBitmap);
+        }
+    }
+
     @OnClick(R.id.hide_story_button)
-    void clickHideStory() {
-        hideStoryButton.animate().alpha(0).setListener(
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        hideStoryButton.setVisibility(View.INVISIBLE);
-                    }
-                });
+    void clickHideButton() {
+        if (addingStory) {
+            submitStoryContainer.setVisibility(View.INVISIBLE);
+            hideStoryButton.setVisibility(View.INVISIBLE);
+            addStoryButton.setVisibility(View.VISIBLE);
+            activeStory = null;
+            addingStory = false;
+            map.setMyLocationEnabled(true);
 
-        storyImage.animate().scaleX(0f).scaleY(0f)
-                .setInterpolator(new AccelerateInterpolator());
-        storyText.animate().alpha(0).translationY(64)
-                .setInterpolator(new AccelerateInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        storyContainer.setVisibility(View.GONE);
-                    }
-                });
+            submitStoryImage.setImageResource(0);
+            submitStoryEditText.setText("");
+        } else if (showingStory) {
+            hideStoryButton.animate().alpha(0).setListener(
+                    new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            hideStoryButton.setVisibility(View.INVISIBLE);
+                            addStoryButton.setVisibility(View.VISIBLE);
+                        }
+                    });
 
-        map.setMyLocationEnabled(true);
-        showingStory = false;
-        activeStory = null;
+            storyImage.animate().scaleX(0f).scaleY(0f)
+                    .setInterpolator(new AccelerateInterpolator());
+            storyText.animate().alpha(0).translationY(64)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            storyContainer.setVisibility(View.GONE);
+                        }
+                    });
+
+            map.setMyLocationEnabled(true);
+            showingStory = false;
+            activeStory = null;
+        }
+    }
+
+    @OnClick(R.id.submit_story_button)
+    void clickSubmitButton() {
+        Story story = new Story();
+        story.latitude = lastLat;
+        story.longitude = lastLng;
+        story.url = "http://istorijosmessengerbot.azurewebsites.net/kairys.jpg";
+        story.text = submitStoryEditText.getText().toString();
+        Api.getStoriesService().createStory(story).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Error " + response.code(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Ačiū! Tavo istorija padaro miesta gyvesniu.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        clickHideButton();
+    }
+
+    @OnClick(R.id.add_story_button)
+    void clickAddStory() {
+        hideShowStory();
+        map.setMyLocationEnabled(false);
+        submitStoryContainer.setVisibility(View.VISIBLE);
+        submitStoryContainer.setAlpha(0);
+        submitStoryContainer.animate().alpha(1);
+
+        hideStoryButton.setVisibility(View.VISIBLE);
+        addStoryButton.setVisibility(View.INVISIBLE);
+
+        addingStory = true;
     }
 
     @Override
@@ -348,8 +464,8 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     @Override
     public void onBackPressed() {
-        if (showingStory) {
-            clickHideStory();
+        if (showingStory || addingStory) {
+            clickHideButton();
         } else {
             super.onBackPressed();
         }
@@ -377,6 +493,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+        handler.removeCallbacks(updateGps);
     }
 
     @Override
