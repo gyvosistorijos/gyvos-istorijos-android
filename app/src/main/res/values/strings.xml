@@ -2,4 +2,6 @@
     <string name="app_name">Istorijos</string>
 
     <string name="mapbox_map_style_url">mapbox://styles/justasm/cisurswjg00012wmqtxqkc7aa</string>
+
+    <string name="open_story_cta">Noriu sužinoti</string>
 </resources>

@@ -3,6 +3,7 @@ package com.trafi.istorijos;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -15,11 +16,13 @@ import android.text.Html;
 import android.text.util.Linkify;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -37,6 +40,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindDimen;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -56,16 +60,33 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     ImageView storyImage;
     @BindView(R.id.text)
     TextView storyText;
-    @BindView(R.id.close_button)
-    View closeButton;
+    @BindView(R.id.hide_story_button)
+    View hideStoryButton;
+
+    @BindView(R.id.show_story_image)
+    ImageView showStoryImage;
+    @BindView(R.id.show_story_button)
+    View showStoryButton;
+    @BindDimen(R.dimen.image_height)
+    int imageHeight;
+    @BindDimen(R.dimen.attractor_height_offset)
+    int attractorHeightOffset;
+    @BindDimen(R.dimen.attractor_height_delta)
+    int attractorHeightDelta;
 
     LocationServices locationServices;
     MapboxMap map;
     boolean zoomedIn;
+    boolean initialized;
     boolean showingStory;
 
     List<MarkerView> storyMarkers = new ArrayList<>();
     LongSparseArray<Story> markerIdToStory = new LongSparseArray<>();
+
+    @Nullable
+    Story activeStory;
+
+    ValueAnimator showStoryAnimator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +116,19 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
                 } else {
                     enableLocation(true);
                 }
+            }
+        });
+
+        showStoryAnimator = ValueAnimator.ofFloat(imageHeight - attractorHeightOffset - attractorHeightDelta, imageHeight - attractorHeightOffset);
+        showStoryAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        showStoryAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        showStoryAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        showStoryAnimator.setDuration(1400);
+        showStoryAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float value = (Float) animation.getAnimatedValue();
+                showStoryImage.setTranslationY(value);
             }
         });
     }
@@ -127,51 +161,111 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     }
 
     private float getAlpha(LatLng markerPosition, Location location) {
-        return (float) Math.max(0,
+        return (float) Math.max(0.4,
                 1 - markerPosition.distanceTo(
                         new LatLng(location.getLatitude(), location.getLongitude())) / 1000);
     }
 
     private void onUserLocationUpdated(@Nullable final Location location) {
-        if (location != null) {
-            if (zoomedIn) {
-                for (MarkerView marker : storyMarkers) {
-                    marker.setAlpha(getAlpha(marker.getPosition(), location));
-                }
-            } else {
-                // Move the map camera to where the user location is
-                map.setCameraPosition(new CameraPosition.Builder()
-                        .target(new LatLng(location))
-                        .zoom(16)
-                        .build());
-                zoomedIn = true;
+        if (location == null) {
+            return;
+        }
 
-                Api.getStoriesService().listStories().enqueue(new Callback<List<Story>>() {
-                    @Override
-                    public void onResponse(Call<List<Story>> call, Response<List<Story>> response) {
-                        if (response.isSuccessful()) {
-                            List<Story> stories = response.body();
-                            for (Story story : stories) {
-                                MarkerView marker = map.addMarker(new MarkerViewOptions()
-                                        .icon(IconFactory.getInstance(MainActivity.this)
-                                                .fromResource(R.drawable.dot))
-                                        .flat(true)
-                                        .position(new LatLng(story.latitude, story.longitude)));
+        if (!zoomedIn) {
+            // Move the map camera to where the user location is
+            map.setCameraPosition(new CameraPosition.Builder()
+                    .target(new LatLng(location))
+                    .zoom(16)
+                    .build());
+            zoomedIn = true;
+        }
 
-                                marker.setAlpha(getAlpha(marker.getPosition(), location));
+        if (!initialized) {
+            Api.getStoriesService().listStories().enqueue(new Callback<List<Story>>() {
+                @Override
+                public void onResponse(Call<List<Story>> call, Response<List<Story>> response) {
+                    if (response.isSuccessful() && !initialized) {
+                        List<Story> stories = response.body();
+                        for (Story story : stories) {
+                            MarkerView marker = map.addMarker(new MarkerViewOptions()
+                                    .icon(IconFactory.getInstance(MainActivity.this)
+                                            .fromResource(R.drawable.dot))
+                                    .flat(true)
+                                    .position(new LatLng(story.latitude, story.longitude)));
 
-                                markerIdToStory.put(marker.getId(), story);
-                                storyMarkers.add(marker);
-                            }
+                            marker.setAlpha(getAlpha(marker.getPosition(), location));
+
+                            markerIdToStory.put(marker.getId(), story);
+                            storyMarkers.add(marker);
                         }
+                        initialized = true;
                     }
+                }
 
-                    @Override
-                    public void onFailure(Call<List<Story>> call, Throwable t) {
-                    }
-                });
+                @Override
+                public void onFailure(Call<List<Story>> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            for (MarkerView marker : storyMarkers) {
+                marker.setAlpha(getAlpha(marker.getPosition(), location));
+            }
+
+            // find 'active' story, if one exists
+            Story prevActiveStory = activeStory;
+            double closestDistanceMeters = Double.MAX_VALUE;
+            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            for (int i = 0; i < markerIdToStory.size(); i++) {
+                Story story = markerIdToStory.valueAt(i);
+
+                double distanceMeters = userLocation.distanceTo(new LatLng(story.latitude, story.longitude));
+                if (distanceMeters < closestDistanceMeters) {
+                    activeStory = story;
+                    closestDistanceMeters = distanceMeters;
+                }
+            }
+            if (null != activeStory && closestDistanceMeters > 1000) {
+                activeStory = null;
+            }
+
+            if (null == prevActiveStory && null != activeStory) {
+                if (!showingStory) {
+                    showShowStory();
+                }
+            } else if (null != prevActiveStory && null == activeStory) {
+                if (showingStory) {
+                    clickHideStory();
+                } else {
+                    hideShowStory();
+                }
+            } else if (null != prevActiveStory && null != activeStory && prevActiveStory != activeStory) {
+                updateShowStoryButton();
             }
         }
+    }
+
+    private void showShowStory() {
+        showStoryAnimator.start();
+        showStoryButton.setVisibility(View.VISIBLE);
+        showStoryImage.setVisibility(View.VISIBLE);
+        updateShowStoryButton();
+    }
+
+    private void updateShowStoryButton() {
+        Picasso.with(MainActivity.this).load(activeStory.url).fit().centerCrop().into(showStoryImage);
+    }
+
+    private void hideShowStory() {
+        showStoryAnimator.cancel();
+        showStoryButton.setVisibility(View.INVISIBLE);
+        showStoryImage.setVisibility(View.INVISIBLE);
+    }
+
+    @OnClick({R.id.show_story_button, R.id.show_story_image})
+    void clickShowStory() {
+        hideShowStory();
+        showStory(activeStory);
     }
 
     private void showStory(Story story) {
@@ -208,20 +302,20 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
                     }
                 });
 
-        closeButton.setVisibility(View.VISIBLE);
-        closeButton.setAlpha(0);
-        closeButton.animate().setListener(null).alpha(1);
+        hideStoryButton.setVisibility(View.VISIBLE);
+        hideStoryButton.setAlpha(0);
+        hideStoryButton.animate().setListener(null).alpha(1);
 
         showingStory = true;
     }
 
-    @OnClick(R.id.close_button)
-    void closeStory() {
-        closeButton.animate().alpha(0).setListener(
+    @OnClick(R.id.hide_story_button)
+    void clickHideStory() {
+        hideStoryButton.animate().alpha(0).setListener(
                 new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        closeButton.setVisibility(View.INVISIBLE);
+                        hideStoryButton.setVisibility(View.INVISIBLE);
                     }
                 });
 
@@ -238,6 +332,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
         map.setMyLocationEnabled(true);
         showingStory = false;
+        activeStory = null;
     }
 
     @Override
@@ -254,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     @Override
     public void onBackPressed() {
         if (showingStory) {
-            closeStory();
+            clickHideStory();
         } else {
             super.onBackPressed();
         }

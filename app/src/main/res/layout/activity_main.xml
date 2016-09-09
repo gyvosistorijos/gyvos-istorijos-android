@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
@@ -43,9 +44,9 @@
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
+                android:layout_height="@dimen/image_height"
                 android:elevation="8dp"
-                tools:background="#f00" />
+                tools:src="#f00" />
 
             <TextView
                 android:id="@+id/text"
@@ -64,14 +65,39 @@
     </ScrollView>
 
     <ImageView
-        android:id="@+id/close_button"
+        android:id="@+id/hide_story_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="end"
         android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="12dp"
-        android:src="@drawable/ic_cancel_24dp"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_cancel_24dp"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/show_story_image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/image_height"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        tools:src="#0f0"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/show_story_button"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="64dp"
+        android:background="@drawable/button_border"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:text="@string/open_story_cta"
         android:visibility="invisible"
         tools:visibility="visible" />
 
