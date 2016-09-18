@@ -16,7 +16,7 @@
         mapbox:center_latitude="54.6872"
         mapbox:center_longitude="25.2797"
         mapbox:logo_enabled="false"
-        mapbox:style_url="@string/mapbox_map_style_url"
+        mapbox:style_url="@string/MAPBOX_MAP_STYLE_URL"
         mapbox:zoom="11"
         tools:visibility="gone" />
 

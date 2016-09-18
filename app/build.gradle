@@ -14,6 +14,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"" + MAPBOX_ACCESS_TOKEN + "\"")
+        resValue("string", "MAPBOX_MAP_STYLE_URL", "\"" + MAPBOX_MAP_STYLE_URL + "\"")
     }
 
     signingConfigs {
