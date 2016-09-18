@@ -1,4 +1,4 @@
-package com.trafi.istorijos
+package lt.gyvosistorijos
 
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody

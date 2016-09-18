@@ -1,4 +1,4 @@
-package com.trafi.istorijos
+package lt.gyvosistorijos
 
 import android.Manifest
 import android.animation.Animator

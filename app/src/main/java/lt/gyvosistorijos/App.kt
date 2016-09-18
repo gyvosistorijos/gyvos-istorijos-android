@@ -1,7 +1,6 @@
-package com.trafi.istorijos
+package lt.gyvosistorijos
 
 import android.app.Application
-
 import com.mapbox.mapboxsdk.MapboxAccountManager
 
 class App : Application() {
