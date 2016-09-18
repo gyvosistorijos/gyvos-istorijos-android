@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -44,7 +43,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import butterknife.BindDimen;
 import butterknife.BindView;
@@ -105,22 +103,8 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     ValueAnimator showStoryAnimator;
 
-    Handler handler = new Handler();
-
     double lastLat;
     double lastLng;
-
-    final Runnable updateGps = new Runnable() {
-        @Override
-        public void run() {
-            Random random = new Random();
-            Location location = new Location("gps");
-            location.setLatitude(54.694680 + 2 * (random.nextDouble() - 0.5) * 0.001);
-            location.setLongitude(25.274590 + 2 * (random.nextDouble() - 0.5) * 0.001);
-            locationServices.onLocationChanged(location);
-            handler.postDelayed(updateGps, 5000);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,21 +166,13 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
 
     private void enableLocation(boolean enabled) {
         if (enabled) {
-
-            Location location = new Location("gps");
-            location.setLatitude(54.692680);
-            location.setLongitude(25.272590);
-
-//            onUserLocationUpdated(locationServices.getLastLocation());
+            onUserLocationUpdated(locationServices.getLastLocation());
             locationServices.addLocationListener(new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     onUserLocationUpdated(location);
                 }
             });
-            locationServices.onLocationChanged(location);
-
-            handler.postDelayed(updateGps, 5000);
         }
         // Enable or disable the location layer on the map
         map.setMyLocationEnabled(enabled);
@@ -493,7 +469,6 @@ public class MainActivity extends AppCompatActivity implements MapboxMap.OnMarke
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
-        handler.removeCallbacks(updateGps);
     }
 
     @Override
