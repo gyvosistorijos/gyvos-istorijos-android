@@ -60,6 +60,27 @@
                 android:lineSpacingExtra="6dp"
                 tools:text="I am story, a big beautiful story of love and cookies and DMP." />
 
+            <ImageView
+                android:id="@+id/storyAuthorImage"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="48dp"
+                app:srcCompat="@drawable/ic_account_circle_white_64dp" />
+
+            <TextView
+                android:id="@+id/storyAuthor"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="64dp"
+                android:layout_marginRight="64dp"
+                android:fontFeatureSettings="smcp"
+                android:gravity="center"
+                tools:text="Vincas Mykolaitis-Putinas" />
+
         </LinearLayout>
 
     </ScrollView>
@@ -87,7 +108,7 @@
         android:layout_gravity="bottom"
         android:visibility="invisible"
         tools:src="#0f0"
-        tools:visibility="visible" />
+        tools:visibility="invisible" />
 
     <ImageView
         android:id="@+id/hideStoryButton"
@@ -99,6 +120,6 @@
         android:padding="12dp"
         android:visibility="invisible"
         app:srcCompat="@drawable/ic_cancel_24dp"
-        tools:visibility="invisible" />
+        tools:visibility="visible" />
 
 </FrameLayout>
