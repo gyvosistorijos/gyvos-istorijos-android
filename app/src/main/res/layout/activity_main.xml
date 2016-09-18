@@ -9,7 +9,7 @@
     tools:context="com.trafi.istorijos.MainActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/map_view"
+        android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         mapbox:attribution_enabled="false"
@@ -26,7 +26,7 @@
         android:background="@drawable/center_gradient" />
 
     <ScrollView
-        android:id="@+id/scroll_view"
+        android:id="@+id/storyContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
@@ -42,14 +42,14 @@
             android:paddingTop="72dp">
 
             <ImageView
-                android:id="@+id/image"
+                android:id="@+id/storyImage"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/image_height"
                 android:elevation="8dp"
                 tools:src="#f00" />
 
             <TextView
-                android:id="@+id/text"
+                android:id="@+id/storyText"
                 style="@style/TextAppearance.AppCompat.Subhead"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
     </ScrollView>
 
     <TextView
-        android:id="@+id/show_story_button"
+        android:id="@+id/showStoryButton"
         style="@style/TextAppearance.AppCompat.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
         tools:visibility="visible" />
 
     <ImageView
-        android:id="@+id/show_story_image"
+        android:id="@+id/showStoryImage"
         android:layout_width="match_parent"
         android:layout_height="@dimen/image_height"
         android:layout_gravity="bottom"
@@ -90,7 +90,7 @@
         tools:visibility="visible" />
 
     <ScrollView
-        android:id="@+id/submit_story_container"
+        android:id="@+id/submitStoryContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -103,7 +103,7 @@
             android:orientation="vertical">
 
             <FrameLayout
-                android:id="@+id/add_photo_button"
+                android:id="@+id/addPhotoButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/image_height"
                 android:layout_marginTop="72dp"
@@ -122,7 +122,7 @@
 
 
                 <ImageView
-                    android:id="@+id/submit_story_image"
+                    android:id="@+id/submitStoryImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop" />
@@ -130,7 +130,7 @@
             </FrameLayout>
 
             <EditText
-                android:id="@+id/story_edit_text"
+                android:id="@+id/submitStoryEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -140,7 +140,7 @@
                 android:hint="Kas įvyko?" />
 
             <TextView
-                android:id="@+id/submit_story_button"
+                android:id="@+id/submitStoryButton"
                 style="@style/TextAppearance.AppCompat.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -158,7 +158,7 @@
     </ScrollView>
 
     <ImageView
-        android:id="@+id/hide_story_button"
+        android:id="@+id/hideStoryButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="end"
@@ -170,7 +170,7 @@
         tools:visibility="invisible" />
 
     <ImageView
-        android:id="@+id/add_story_button"
+        android:id="@+id/addStoryButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="end"
