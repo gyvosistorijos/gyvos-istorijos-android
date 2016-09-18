@@ -15,12 +15,26 @@ android {
 
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"" + MAPBOX_ACCESS_TOKEN + "\"")
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+        }
+    }
+
     buildTypes {
+        debug {
+            applicationIdSuffix '.dev'
+            versionNameSuffix '-debug'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -47,6 +61,9 @@ dependencies {
 
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
+
 repositories {
     mavenCentral()
 }
+
+apply plugin: 'com.google.gms.google-services'
