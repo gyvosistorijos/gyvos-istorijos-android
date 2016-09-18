@@ -15,15 +15,36 @@ android {
 
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"" + MAPBOX_ACCESS_TOKEN + "\"")
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+        }
+    }
+
     buildTypes {
+        debug {
+            applicationIdSuffix '.dev'
+            versionNameSuffix '-debug'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+}
+
+ext {
+    firebaseVersion = '9.4.0'
+    retrofitVersion = '2.1.0'
+    supportVersion = '24.2.1'
+    okHttpVersion = '3.4.1'
 }
 
 dependencies {
@@ -31,22 +52,29 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile "com.android.support:appcompat-v7:$supportVersion"
     testCompile 'junit:junit:4.12'
 
     compile('com.mapbox.mapboxsdk:mapbox-android-sdk:4.1.1@aar') {
         transitive = true
     }
 
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    compile "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
     compile 'com.squareup.moshi:moshi:1.2.0'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-moshi:2.1.0'
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
     compile 'com.squareup.picasso:picasso:2.5.2'
+
+    compile "com.google.firebase:firebase-core:$firebaseVersion"
+    compile "com.google.firebase:firebase-messaging:$firebaseVersion"
+    compile "com.google.firebase:firebase-crash:$firebaseVersion"
 
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
+
 repositories {
     mavenCentral()
 }
+
+apply plugin: 'com.google.gms.google-services'
