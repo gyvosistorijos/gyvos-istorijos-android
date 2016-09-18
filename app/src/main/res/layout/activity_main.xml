@@ -89,74 +89,6 @@
         tools:src="#0f0"
         tools:visibility="visible" />
 
-    <ScrollView
-        android:id="@+id/submitStoryContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <FrameLayout
-                android:id="@+id/addPhotoButton"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/image_height"
-                android:layout_marginTop="72dp"
-                android:background="#4fff">
-
-                <TextView
-                    style="@style/TextAppearance.AppCompat.Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:paddingBottom="8dp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:paddingTop="8dp"
-                    android:text="Kaip atrodė?" />
-
-
-                <ImageView
-                    android:id="@+id/submitStoryImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop" />
-
-            </FrameLayout>
-
-            <EditText
-                android:id="@+id/submitStoryEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:layout_marginLeft="48dp"
-                android:layout_marginRight="48dp"
-                android:layout_marginTop="16dp"
-                android:hint="Kas įvyko?" />
-
-            <TextView
-                android:id="@+id/submitStoryButton"
-                style="@style/TextAppearance.AppCompat.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="56dp"
-                android:background="@drawable/button_border"
-                android:paddingBottom="8dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:paddingTop="8dp"
-                android:text="Pasidalink istorija" />
-
-        </LinearLayout>
-
-    </ScrollView>
-
     <ImageView
         android:id="@+id/hideStoryButton"
         android:layout_width="48dp"
@@ -168,17 +100,5 @@
         android:visibility="invisible"
         app:srcCompat="@drawable/ic_cancel_24dp"
         tools:visibility="invisible" />
-
-    <ImageView
-        android:id="@+id/addStoryButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="end"
-        android:layout_margin="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="12dp"
-        android:visibility="visible"
-        app:srcCompat="@drawable/ic_add_circle_white_24dp"
-        tools:visibility="visible" />
 
 </FrameLayout>
