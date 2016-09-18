@@ -14,8 +14,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     val NOTIFICATION_ID = 0
 
-    override fun onMessageReceived(remoteMessage: RemoteMessage?) {
-        val notification = remoteMessage!!.notification
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        val notification = remoteMessage.notification
 
         if (notification != null) {
             val notificationIntent = Intent(this, MainActivity::class.java)
