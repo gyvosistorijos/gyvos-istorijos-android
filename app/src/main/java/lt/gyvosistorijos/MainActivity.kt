@@ -20,7 +20,6 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import com.mapbox.mapboxsdk.annotations.IconFactory
-import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerView
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions
 import com.mapbox.mapboxsdk.camera.CameraPosition
@@ -34,7 +33,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-class MainActivity : AppCompatActivity(), MapboxMap.OnMarkerViewClickListener {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         private val PERMISSIONS_LOCATION = 0
@@ -66,8 +65,6 @@ class MainActivity : AppCompatActivity(), MapboxMap.OnMarkerViewClickListener {
 
             map.uiSettings.isTiltGesturesEnabled = false
             map.uiSettings.isRotateGesturesEnabled = false
-
-            map.markerViewManager.setOnMarkerViewClickListener(this@MainActivity)
 
             // Check if user has granted location permission
             if (!locationServices.areLocationPermissionsGranted()) {
@@ -299,16 +296,6 @@ class MainActivity : AppCompatActivity(), MapboxMap.OnMarkerViewClickListener {
         map.isMyLocationEnabled = true
         showingStory = false
         activeStory = null
-    }
-
-    override fun onMarkerClick(marker: Marker, view: View,
-                               adapter: MapboxMap.MarkerViewAdapter<*>): Boolean {
-        val story = markerIdToStory.get(marker.id)
-        if (null != story) {
-            showStory(story)
-            return true
-        }
-        return false
     }
 
     override fun onBackPressed() {
