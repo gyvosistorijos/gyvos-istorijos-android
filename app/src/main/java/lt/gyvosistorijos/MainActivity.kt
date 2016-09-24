@@ -13,13 +13,10 @@ import android.support.v7.app.AppCompatActivity
 import android.text.Html
 import android.text.util.Linkify
 import android.view.View
-import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import com.mapbox.mapboxsdk.annotations.IconFactory
+import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerView
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions
 import com.mapbox.mapboxsdk.camera.CameraPosition
@@ -33,7 +30,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MapboxMap.OnMarkerViewClickListener {
 
     companion object {
         private val PERMISSIONS_LOCATION = 0
@@ -41,15 +38,17 @@ class MainActivity : AppCompatActivity() {
 
     internal lateinit var locationServices: LocationServices
     internal lateinit var map: MapboxMap
+
     internal var zoomedIn: Boolean = false
     internal var initialized: Boolean = false
     internal var showingStory: Boolean = false
 
-    internal var storyMarkers: MutableList<MarkerView> = ArrayList()
-    internal var markerIdToStory = LongSparseArray<Story>()
+    internal val storyMarkers: MutableList<MarkerView> = ArrayList()
+    internal val markerIdToStory = LongSparseArray<Story>()
 
     internal var activeStory: Story? = null
 
+    internal val storyAnimator: StoryAnimator = StoryAnimator()
     internal lateinit var showStoryAnimator: ValueAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +64,10 @@ class MainActivity : AppCompatActivity() {
 
             map.uiSettings.isTiltGesturesEnabled = false
             map.uiSettings.isRotateGesturesEnabled = false
+
+            if (BuildConfig.DEBUG) {
+                map.markerViewManager.setOnMarkerViewClickListener(this@MainActivity)
+            }
 
             // Check if user has granted location permission
             if (!locationServices.areLocationPermissionsGranted()) {
@@ -98,6 +101,17 @@ class MainActivity : AppCompatActivity() {
         showStoryButton.setOnClickListener { clickShowStory() }
         showStoryImage.setOnClickListener { clickShowStory() }
         hideStoryButton.setOnClickListener { clickHideButton() }
+    }
+
+    // debug builds only
+    override fun onMarkerClick(marker: Marker, view: View,
+                               adapter: MapboxMap.MarkerViewAdapter<*>): Boolean {
+        val story = markerIdToStory.get(marker.id)
+        if (null != story) {
+            showStory(story)
+            return true
+        }
+        return false
     }
 
     override fun onRequestPermissionsResult(
@@ -231,36 +245,30 @@ class MainActivity : AppCompatActivity() {
     private fun showStory(story: Story) {
         map.isMyLocationEnabled = false
 
-        Picasso.with(this).load(story.url).fit().centerCrop().into(storyImage)
+        if (!story.url.isNullOrBlank()) {
+            storyImage.visibility = View.VISIBLE
+            Picasso.with(this).load(story.url)
+                    .fit().centerCrop()
+                    .placeholder(R.color.imagePlaceholder)
+                    .into(storyImage)
+        } else {
+            storyImage.visibility = View.GONE
+        }
+
         storyText.text = @Suppress("DEPRECATION") (Html.fromHtml(story.text))
         Linkify.addLinks(storyText, Linkify.WEB_URLS)
 
+        if (!story.author.isNullOrBlank()) {
+            storyAuthor.text = story.author
+            storyAuthor.visibility = View.VISIBLE
+            storyAuthorImage.visibility = View.VISIBLE
+        } else {
+            storyAuthor.visibility = View.GONE
+            storyAuthorImage.visibility = View.GONE
+        }
+
         storyContainer.visibility = View.VISIBLE
-        storyContainer.viewTreeObserver.addOnPreDrawListener(
-                object : ViewTreeObserver.OnPreDrawListener {
-                    override fun onPreDraw(): Boolean {
-                        storyContainer.viewTreeObserver.removeOnPreDrawListener(this)
-
-                        storyImage.scaleX = 0.8f
-                        storyImage.scaleY = 0.8f
-
-                        storyImage.animate()
-                                .scaleX(1f).scaleY(1f)
-                                .setInterpolator(OvershootInterpolator())
-                                .setListener(null)
-                                .start()
-
-                        storyText.alpha = 0f
-                        storyText.translationY = 64f
-
-                        storyText.animate()
-                                .alpha(1f).translationY(0f)
-                                .setInterpolator(DecelerateInterpolator())
-                                .setListener(null)
-                                .start()
-                        return true
-                    }
-                })
+        storyAnimator.animateInStory(storyContainer)
 
         hideStoryButton.visibility = View.VISIBLE
         hideStoryButton.alpha = 0f
@@ -281,17 +289,12 @@ class MainActivity : AppCompatActivity() {
                             }
                         })
 
-        storyImage.animate()
-                .scaleX(0f).scaleY(0f)
-                .interpolator = AccelerateInterpolator()
-        storyText.animate()
-                .alpha(0f).translationY(64f)
-                .setInterpolator(AccelerateInterpolator())
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        storyContainer.visibility = View.GONE
-                    }
-                })
+        storyAnimator.animateOutStory(storyContainer, object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                storyContainer.visibility = View.GONE
+                storyContainer.scrollTo(0, 0)
+            }
+        })
 
         map.isMyLocationEnabled = true
         showingStory = false
