@@ -5,7 +5,7 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
-import kotlinx.android.synthetic.main.activity_main.view.*
+import kotlinx.android.synthetic.main.controller_story.view.*
 
 class StoryAnimator {
 
@@ -29,16 +29,16 @@ class StoryAnimator {
         container.storyAuthor.translationY = 64f
         container.storyAuthor.animate()
                 .alpha(1f).translationY(0f)
-                .setStartDelay(200)
                 .setInterpolator(DecelerateInterpolator())
+                .setStartDelay(200)
                 .start()
 
         container.storyAuthorImage.alpha = 0f
         container.storyAuthorImage.translationY = 64f
         container.storyAuthorImage.animate()
                 .alpha(1f).translationY(0f)
-                .setStartDelay(200)
                 .setInterpolator(DecelerateInterpolator())
+                .setStartDelay(200)
                 .start()
     }
 
@@ -62,8 +62,8 @@ class StoryAnimator {
 
         container.storyAuthorImage.animate()
                 .alpha(0f).translationY(64f)
-                .setStartDelay(0)
                 .setInterpolator(AccelerateInterpolator())
+                .setStartDelay(0)
                 .start()
     }
 
