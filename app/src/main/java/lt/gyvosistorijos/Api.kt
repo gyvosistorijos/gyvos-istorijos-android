@@ -30,7 +30,7 @@ object Api {
 
             val retrofit = Retrofit.Builder()
                     .client(client)
-                    .baseUrl("http://istorijosmessengerbot.azurewebsites.net/api/")
+                    .baseUrl("http://www.gyvosistorijos.lt/api/")
                     .addConverterFactory(MoshiConverterFactory.create())
                     .build()
             storiesService = retrofit.create(StoriesService::class.java)
