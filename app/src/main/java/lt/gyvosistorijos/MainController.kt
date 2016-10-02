@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.Toast
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.mapbox.mapboxsdk.annotations.IconFactory
@@ -21,9 +20,6 @@ import com.mapbox.mapboxsdk.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.*
 
 class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, LocationListener {
@@ -33,7 +29,6 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     internal lateinit var locationServices: LocationServices
 
     internal var zoomedIn: Boolean = false
-    internal var initialized: Boolean = false
     internal var activeStory: Story? = null
 
     internal val storyMarkers: MutableList<MarkerView> = ArrayList()
@@ -71,6 +66,24 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             map.markerViewManager.setOnMarkerViewClickListener(this)
         }
 
+        val stories = StoryDb(applicationContext).getAll()
+        map.clear()
+        storyMarkers.clear()
+        markerIdToStory.clear()
+        for (story in stories) {
+            val marker = map.addMarker(MarkerViewOptions()
+                    .icon(IconFactory.getInstance(activity)
+                            .fromResource(R.drawable.dot))
+                    .flat(true)
+                    .position(LatLng(story.latitude, story.longitude)))
+
+            // call after #addMarker due to Mapbox SDK bug
+            marker.alpha = 0f
+
+            markerIdToStory.put(marker.id, story)
+            storyMarkers.add(marker)
+        }
+
         locationServices = LocationServices.getLocationServices(applicationContext)
         onLocationChanged(locationServices.lastLocation)
         locationServices.addLocationListener(this)
@@ -90,63 +103,35 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             zoomedIn = true
         }
 
-        if (!initialized) {
-            Api.getStoriesService().listStories().enqueue(object : Callback<List<Story>> {
-                override fun onResponse(call: Call<List<Story>>, response: Response<List<Story>>) {
-                    if (response.isSuccessful && !initialized) {
-                        val stories = response.body()
-                        for (story in stories) {
-                            val marker = map.addMarker(MarkerViewOptions()
-                                    .icon(IconFactory.getInstance(activity)
-                                            .fromResource(R.drawable.dot))
-                                    .flat(true)
-                                    .position(LatLng(story.latitude, story.longitude)))
+        for (marker in storyMarkers) {
+            marker.alpha = getAlpha(marker.position, location)
+        }
 
-                            // call after #addMarker due to Mapbox SDK bug
-                            marker.alpha = getAlpha(marker.position, location)
+        // find 'active' story, if one exists
+        val prevActiveStory = activeStory
+        var closestDistanceMeters = java.lang.Double.MAX_VALUE
+        val userLocation = LatLng(location.latitude, location.longitude)
+        for (i in 0..markerIdToStory.size() - 1) {
+            val story = markerIdToStory.valueAt(i)
 
-                            markerIdToStory.put(marker.id, story)
-                            storyMarkers.add(marker)
-                        }
-                        initialized = true
-                    }
-                }
-
-                override fun onFailure(call: Call<List<Story>>, t: Throwable) {
-                    Toast.makeText(activity, t.message, Toast.LENGTH_SHORT).show()
-                }
-            })
-        } else {
-            for (marker in storyMarkers) {
-                marker.alpha = getAlpha(marker.position, location)
+            val distanceMeters =
+                    userLocation.distanceTo(LatLng(story.latitude, story.longitude))
+            if (distanceMeters < closestDistanceMeters) {
+                activeStory = story
+                closestDistanceMeters = distanceMeters
             }
+        }
+        if (null != activeStory && closestDistanceMeters > 1000) {
+            activeStory = null
+        }
 
-            // find 'active' story, if one exists
-            val prevActiveStory = activeStory
-            var closestDistanceMeters = java.lang.Double.MAX_VALUE
-            val userLocation = LatLng(location.latitude, location.longitude)
-            for (i in 0..markerIdToStory.size() - 1) {
-                val story = markerIdToStory.valueAt(i)
-
-                val distanceMeters =
-                        userLocation.distanceTo(LatLng(story.latitude, story.longitude))
-                if (distanceMeters < closestDistanceMeters) {
-                    activeStory = story
-                    closestDistanceMeters = distanceMeters
-                }
-            }
-            if (null != activeStory && closestDistanceMeters > 1000) {
-                activeStory = null
-            }
-
-            if (null == prevActiveStory && null != activeStory) {
-                showShowStory()
-            } else if (null != prevActiveStory && null == activeStory) {
-                hideShowStory()
-            } else if (null != prevActiveStory && null != activeStory
-                    && prevActiveStory !== activeStory) {
-                updateShowStoryButton()
-            }
+        if (null == prevActiveStory && null != activeStory) {
+            showShowStory()
+        } else if (null != prevActiveStory && null == activeStory) {
+            hideShowStory()
+        } else if (null != prevActiveStory && null != activeStory
+                && prevActiveStory !== activeStory) {
+            updateShowStoryButton()
         }
     }
 

@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             map.uiSettings.isRotateGesturesEnabled = false
 
             if (!router.hasRootController()) {
-                router.setRoot(RouterTransaction.with(PermissionsController()))
+                router.setRoot(RouterTransaction.with(SyncController()))
             }
         }
     }
