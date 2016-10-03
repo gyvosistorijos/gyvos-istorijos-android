@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/showStoryImage"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/image_height"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        tools:src="#0f0"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/showStoryButton"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="64dp"
+        android:background="@drawable/button_border"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:text="@string/open_story_cta"
+        android:visibility="invisible"
+        tools:visibility="visible" />
+
+</FrameLayout>
