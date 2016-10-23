@@ -1,0 +1,18 @@
+CREATE TABLE story (
+    id TEXT NOT NULL PRIMARY KEY,
+    text TEXT NOT NULL,
+    url TEXT,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    author TEXT,
+    UNIQUE(id) ON CONFLICT REPLACE
+);
+
+select_all:
+SELECT *
+FROM story;
+
+select_by_id:
+SELECT *
+FROM story
+WHERE id = ?;

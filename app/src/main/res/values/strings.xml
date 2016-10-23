@@ -4,4 +4,6 @@
     <string name="grant_permission_cta">Leisti</string>
     <string name="grant_permission_rationale">Prašome leisti pasiekti įrenginio vietovės informaciją</string>
     <string name="open_story_cta">Noriu sužinoti</string>
+    <string name="sync_retry_cta">Bandyti iš naujo</string>
+    <string name="sync_retry_rationale">Nepavyko rasti istorijų.\n\nPatikrinkite interneto ryši ir pabandykite iš naujo</string>
 </resources>
