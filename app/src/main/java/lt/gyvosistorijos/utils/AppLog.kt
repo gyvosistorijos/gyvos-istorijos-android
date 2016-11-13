@@ -10,7 +10,7 @@ import lt.gyvosistorijos.BuildConfig
  */
 object AppLog {
 
-    val ALLOW_DEBUG_LOG = BuildConfig.DEBUG
+    val ALLOW_LOG = BuildConfig.DEBUG
 
     /**
      * Log String error
@@ -18,7 +18,10 @@ object AppLog {
      * @param value
      */
     private fun error(value: String) {
-        FirebaseCrash.logcat(Log.ERROR, tag, value)
+        if (ALLOW_LOG) {
+            Log.e(tag, value)
+        }
+        logToFirebase(value)
     }
 
     /**
@@ -28,20 +31,25 @@ object AppLog {
      */
     private fun debug(value: String, allow: Boolean) {
         if (allow) {
-            FirebaseCrash.logcat(Log.DEBUG, tag, value)
+            Log.d(tag, value)
         }
+        logToFirebase(value)
     }
 
-    private // create throwable
-            // build tag from throwable
-    val tag: String
+    private fun logToFirebase(value: String) {
+        FirebaseCrash.log("$tag: $value")
+    }
+
+    // create throwable
+    // build tag from throwable
+    private val tag: String
         get() {
             try {
                 val t = Throwable()
                 val elements = t.stackTrace
-                val classComponents = elements[3].getClassName().split("\\.".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
+                val classComponents = elements[3].className.split("\\.".toRegex()).dropLastWhile(String::isEmpty).toTypedArray()
 
-                val tag = classComponents[classComponents.size - 1] + "(" + elements[3].getMethodName() + ":" + elements[3].getLineNumber() + ")"
+                val tag = classComponents[classComponents.size - 1] + "(" + elements[3].methodName + ":" + elements[3].lineNumber + ")"
                 return tag
             } catch (e: Exception) {
 
@@ -57,7 +65,10 @@ object AppLog {
      * @param value
      */
     private fun warning(value: String) {
-        FirebaseCrash.logcat(Log.WARN, tag, value)
+        if (ALLOW_LOG) {
+            Log.w(tag, value)
+        }
+        logToFirebase(value)
     }
 
     /**
@@ -66,7 +77,10 @@ object AppLog {
      * @param value
      */
     private fun info(value: String) {
-        FirebaseCrash.logcat(Log.INFO, tag, value)
+        if (ALLOW_LOG) {
+            Log.i(tag, value)
+        }
+        logToFirebase(value)
     }
 
     /**
@@ -102,7 +116,7 @@ object AppLog {
      * @param value
      */
     fun d(value: String) {
-        AppLog.debug(value, ALLOW_DEBUG_LOG)
+        AppLog.debug(value, ALLOW_LOG)
     }
 
 
@@ -116,7 +130,7 @@ object AppLog {
         AppLog.error(value.toString())
 
         // display stack trace
-        if (ALLOW_DEBUG_LOG) {
+        if (ALLOW_LOG) {
             value.printStackTrace()
         }
 
@@ -130,7 +144,7 @@ object AppLog {
      */
     fun d(trace: Array<StackTraceElement>) {
         for (element in trace) {
-            AppLog.debug(element.toString(), ALLOW_DEBUG_LOG)
+            AppLog.debug(element.toString(), ALLOW_LOG)
         }
     }
 
@@ -141,9 +155,9 @@ object AppLog {
      */
     fun d(value: Exception) {
         // Log Exception info
-        AppLog.debug(value.toString(), ALLOW_DEBUG_LOG)
+        AppLog.debug(value.toString(), ALLOW_LOG)
 
-        if (ALLOW_DEBUG_LOG) {
+        if (ALLOW_LOG) {
             value.printStackTrace()
         }
     }
@@ -155,7 +169,7 @@ object AppLog {
      * @param value
      */
     fun d(value: Double) {
-        AppLog.debug(value.toString(), ALLOW_DEBUG_LOG)
+        AppLog.debug(value.toString(), ALLOW_LOG)
     }
 
     /**
@@ -164,7 +178,7 @@ object AppLog {
      * @param value
      */
     fun d(value: Long) {
-        AppLog.debug(value.toString(), ALLOW_DEBUG_LOG)
+        AppLog.debug(value.toString(), ALLOW_LOG)
     }
 
 }
