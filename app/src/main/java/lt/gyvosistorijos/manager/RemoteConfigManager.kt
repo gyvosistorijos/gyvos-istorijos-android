@@ -51,8 +51,8 @@ class RemoteConfigManager private constructor() {
 
         private val FETCH_CACHE_EXPIRE_TIME = 60L * 60 * 1000 //1h
 
-        private val GEOFENCE_RADIUS_IN_METERS = "geofence_radius_in_meters"
-        private val GEOFENCE_LOITERING_DELAY_IN_SECONDS = "geofence_loitering_delay_in_seconds"
+        private val GEOFENCE_RADIUS_IN_METERS = "geofence_radius_m"
+        private val GEOFENCE_LOITERING_DELAY_IN_SECONDS = "geofence_loitering_s"
 
         val instance: RemoteConfigManager by lazy { Holder.INSTANCE }
     }
