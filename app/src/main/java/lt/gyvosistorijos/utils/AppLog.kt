@@ -10,7 +10,7 @@ import lt.gyvosistorijos.BuildConfig
  */
 object AppLog {
 
-    val ALLOW_LOG = BuildConfig.DEBUG
+    val ALLOW_DEBUG_LOG = BuildConfig.DEBUG
 
     /**
      * Log String error
@@ -18,10 +18,6 @@ object AppLog {
      * @param value
      */
     private fun error(value: String) {
-        if (ALLOW_LOG) {
-            Log.e(tag, value)
-        }
-
         FirebaseCrash.logcat(Log.ERROR, tag, value)
     }
 
@@ -32,10 +28,8 @@ object AppLog {
      */
     private fun debug(value: String, allow: Boolean) {
         if (allow) {
-            Log.d(tag, value)
+            FirebaseCrash.logcat(Log.DEBUG, tag, value)
         }
-
-        FirebaseCrash.logcat(Log.DEBUG, tag, value)
     }
 
     private // create throwable
@@ -63,10 +57,6 @@ object AppLog {
      * @param value
      */
     private fun warning(value: String) {
-        if (ALLOW_LOG) {
-            Log.w(tag, value)
-        }
-
         FirebaseCrash.logcat(Log.WARN, tag, value)
     }
 
@@ -76,10 +66,6 @@ object AppLog {
      * @param value
      */
     private fun info(value: String) {
-        if (ALLOW_LOG) {
-            Log.i(tag, value)
-        }
-
         FirebaseCrash.logcat(Log.INFO, tag, value)
     }
 
@@ -116,7 +102,7 @@ object AppLog {
      * @param value
      */
     fun d(value: String) {
-        AppLog.debug(value, ALLOW_LOG)
+        AppLog.debug(value, ALLOW_DEBUG_LOG)
     }
 
 
@@ -130,7 +116,7 @@ object AppLog {
         AppLog.error(value.toString())
 
         // display stack trace
-        if (ALLOW_LOG) {
+        if (ALLOW_DEBUG_LOG) {
             value.printStackTrace()
         }
 
@@ -144,7 +130,7 @@ object AppLog {
      */
     fun d(trace: Array<StackTraceElement>) {
         for (element in trace) {
-            AppLog.debug(element.toString(), ALLOW_LOG)
+            AppLog.debug(element.toString(), ALLOW_DEBUG_LOG)
         }
     }
 
@@ -155,9 +141,9 @@ object AppLog {
      */
     fun d(value: Exception) {
         // Log Exception info
-        AppLog.debug(value.toString(), ALLOW_LOG)
+        AppLog.debug(value.toString(), ALLOW_DEBUG_LOG)
 
-        if (ALLOW_LOG) {
+        if (ALLOW_DEBUG_LOG) {
             value.printStackTrace()
         }
     }
@@ -169,7 +155,7 @@ object AppLog {
      * @param value
      */
     fun d(value: Double) {
-        AppLog.debug(value.toString(), ALLOW_LOG)
+        AppLog.debug(value.toString(), ALLOW_DEBUG_LOG)
     }
 
     /**
@@ -178,7 +164,7 @@ object AppLog {
      * @param value
      */
     fun d(value: Long) {
-        AppLog.debug(value.toString(), ALLOW_LOG)
+        AppLog.debug(value.toString(), ALLOW_DEBUG_LOG)
     }
 
 }
