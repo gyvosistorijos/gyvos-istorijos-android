@@ -23,7 +23,7 @@ class SyncController : Controller() {
     }
 
     override fun onAttach(view: View) {
-        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
         view.syncRetryButton.setOnClickListener { syncStories() }
         syncStories()

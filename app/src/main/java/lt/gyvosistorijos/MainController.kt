@@ -46,7 +46,7 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     override fun onAttach(view: View) {
-        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
         val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
         val attractorHeightOffset =

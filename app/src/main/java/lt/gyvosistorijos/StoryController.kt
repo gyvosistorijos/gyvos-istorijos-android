@@ -35,7 +35,7 @@ class StoryController(args: Bundle) : Controller(args) {
     }
 
     override fun onAttach(view: View) {
-        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
         map = (activity as MainActivity).map
         map.isMyLocationEnabled = false

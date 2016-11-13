@@ -26,7 +26,7 @@ class PermissionsController : Controller() {
     }
 
     override fun onAttach(view: View) {
-        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
         locationServices = LocationServices.getLocationServices(applicationContext!!)
 
