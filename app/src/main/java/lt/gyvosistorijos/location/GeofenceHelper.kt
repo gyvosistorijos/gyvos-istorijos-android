@@ -74,16 +74,16 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
             val geofenceRadiusInMeters = remoteConfigManager.getGeofenceRadiusInMeters()
             val geofenceLoiteringDelayMs = remoteConfigManager.getGeofenceLoiteringDelayInMilliseconds()
 
-            for (region in regions) {
-                Timber.d("Adding region ${region.id} latitude ${region.latitude} " +
-                        "longitude ${region.longitude} radius ${geofenceRadiusInMeters}m " +
-                        "loytering delay ${geofenceLoiteringDelayMs}ms")
+            for ((id, latitude, longitude) in regions) {
+                Timber.d("Adding region $id latitude $latitude " +
+                        "longitude $longitude radius ${geofenceRadiusInMeters}m " +
+                        "loitering delay ${geofenceLoiteringDelayMs}ms")
 
                 geofenceList.add(Geofence.Builder()
-                        .setRequestId(region.id)
+                        .setRequestId(id)
                         .setCircularRegion(
-                                region.latitude,
-                                region.longitude,
+                                latitude,
+                                longitude,
                                 geofenceRadiusInMeters
                         )
                         .setExpirationDuration(Geofence.NEVER_EXPIRE)
