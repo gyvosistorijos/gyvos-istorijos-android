@@ -176,4 +176,3 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
     }
 }
 
-data class GeofenceRegion(val id: String, val latitude: Double, val longitude: Double)
