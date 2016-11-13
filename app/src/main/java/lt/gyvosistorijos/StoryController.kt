@@ -13,6 +13,7 @@ import com.bluelinelabs.conductor.Controller
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_story.view.*
+import lt.gyvosistorijos.utils.AppEvent
 
 class StoryController(args: Bundle) : Controller(args) {
 
@@ -30,6 +31,8 @@ class StoryController(args: Bundle) : Controller(args) {
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentController(this)
+
         map = (activity as MainActivity).map
         map.isMyLocationEnabled = false
 

@@ -9,6 +9,7 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.mapbox.mapboxsdk.location.LocationServices
 import kotlinx.android.synthetic.main.controller_permissions.view.*
+import lt.gyvosistorijos.utils.AppEvent
 
 class PermissionsController : Controller() {
 
@@ -24,6 +25,8 @@ class PermissionsController : Controller() {
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentController(this)
+
         locationServices = LocationServices.getLocationServices(applicationContext!!)
 
         // Check if user has granted location permission

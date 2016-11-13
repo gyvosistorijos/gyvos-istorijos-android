@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import kotlinx.android.synthetic.main.controller_sync.view.*
+import lt.gyvosistorijos.utils.AppEvent
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,6 +19,8 @@ class SyncController : Controller() {
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentController(this)
+
         view.syncRetryButton.setOnClickListener { syncStories() }
         syncStories()
     }

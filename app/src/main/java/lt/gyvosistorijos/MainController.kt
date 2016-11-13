@@ -21,6 +21,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
 import lt.gyvosistorijos.location.GeofenceRegion
+import lt.gyvosistorijos.utils.AppEvent
 import java.util.*
 
 class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, LocationListener {
@@ -41,6 +42,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentController(this)
+
         val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
         val attractorHeightOffset =
                 resources!!.getDimensionPixelOffset(R.dimen.attractor_height_offset)
