@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
+import lt.gyvosistorijos.location.GeofenceRegion
 import java.util.*
 
 class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, LocationListener {
@@ -83,6 +84,9 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             markerIdToStory.put(marker.id, story)
             storyMarkers.add(marker)
         }
+
+        val geofenceRegions = stories.map { s -> GeofenceRegion(s.id(), s.latitude, s.longitude) }
+        (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
 
         locationServices = LocationServices.getLocationServices(applicationContext!!)
         onLocationChanged(locationServices.lastLocation)
