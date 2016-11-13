@@ -15,6 +15,7 @@ class PermissionsController : Controller() {
 
     companion object {
         val REQUEST_PERMISSIONS_LOCATION = 0
+        val SCREEN_NAME = "Permissions"
     }
 
     internal lateinit var locationServices: LocationServices
@@ -25,7 +26,7 @@ class PermissionsController : Controller() {
     }
 
     override fun onAttach(view: View) {
-        AppEvent.trackCurrentController(this)
+        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
 
         locationServices = LocationServices.getLocationServices(applicationContext!!)
 

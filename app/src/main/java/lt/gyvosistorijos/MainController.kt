@@ -26,6 +26,10 @@ import java.util.*
 
 class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, LocationListener {
 
+    companion object {
+        val SCREEN_NAME = "Main"
+    }
+
     internal lateinit var showStoryAnimator: ValueAnimator
     internal lateinit var map: MapboxMap
     internal lateinit var locationServices: LocationServices
@@ -42,7 +46,7 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     override fun onAttach(view: View) {
-        AppEvent.trackCurrentController(this)
+        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
 
         val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
         val attractorHeightOffset =

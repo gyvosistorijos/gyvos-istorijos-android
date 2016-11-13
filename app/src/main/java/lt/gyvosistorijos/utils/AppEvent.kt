@@ -1,20 +1,12 @@
 package lt.gyvosistorijos.utils
 
-import com.bluelinelabs.conductor.Controller
+import android.app.Activity
 import com.google.firebase.analytics.FirebaseAnalytics
-
 
 object AppEvent {
 
-    fun trackCurrentController(controller: Controller) {
-        val controllerName = controller.javaClass.simpleName
-
-        controller.activity ?: AppLog.e("Activity from controller $controllerName is null")
-
-        controller.activity?.let {
-            activity ->
-            FirebaseAnalytics.getInstance(activity).setCurrentScreen(activity, controllerName, null)
-        }
+    fun tackCurrentScreen(activity: Activity, name: String) {
+        FirebaseAnalytics.getInstance(activity).setCurrentScreen(activity, name, null)
     }
 
 }

@@ -13,13 +13,17 @@ import retrofit2.Response
 
 class SyncController : Controller() {
 
+    companion object {
+        val SCREEN_NAME = "Sync"
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_sync, container, false)
         return view
     }
 
     override fun onAttach(view: View) {
-        AppEvent.trackCurrentController(this)
+        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
 
         view.syncRetryButton.setOnClickListener { syncStories() }
         syncStories()

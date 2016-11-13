@@ -17,6 +17,10 @@ import lt.gyvosistorijos.utils.AppEvent
 
 class StoryController(args: Bundle) : Controller(args) {
 
+    companion object {
+        val SCREEN_NAME = "Story"
+    }
+
     constructor(story: Story) : this(Story.toBundle(story))
 
     private val story = Story.fromBundle(args)
@@ -31,7 +35,7 @@ class StoryController(args: Bundle) : Controller(args) {
     }
 
     override fun onAttach(view: View) {
-        AppEvent.trackCurrentController(this)
+        AppEvent.tackCurrentScreen(activity!!, SCREEN_NAME)
 
         map = (activity as MainActivity).map
         map.isMyLocationEnabled = false
