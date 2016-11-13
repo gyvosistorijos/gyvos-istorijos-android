@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>geofence_loitering_in_seconds</key>
+        <value>60</value>
+    </entry>
+    <entry>
+        <key>geofence_radius_in_meters</key>
+        <value>150</value>
+    </entry>
+</defaultsMap>

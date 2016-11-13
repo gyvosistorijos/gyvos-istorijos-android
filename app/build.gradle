@@ -87,6 +87,7 @@ dependencies {
 
     compile "com.google.firebase:firebase-core:$playServicesVersion"
     compile "com.google.firebase:firebase-messaging:$playServicesVersion"
+    compile "com.google.firebase:firebase-config:$playServicesVersion"
     compile "com.google.firebase:firebase-crash:$playServicesVersion"
 
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"

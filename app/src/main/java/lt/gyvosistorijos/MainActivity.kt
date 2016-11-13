@@ -8,6 +8,7 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import kotlinx.android.synthetic.main.activity_main.*
 import lt.gyvosistorijos.location.GeofenceHelper
+import lt.gyvosistorijos.manager.RemoteConfigManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var map: MapboxMap
 
     internal lateinit var geofenceHelper: GeofenceHelper
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +38,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        geofenceHelper = GeofenceHelper(this)
+        RemoteConfigManager.instance.fetchConfig()
+
+        geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
     }
 
     override fun onBackPressed() {

@@ -11,19 +11,15 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.service.GeofenceIntentService
 import lt.gyvosistorijos.utils.AppLog
 import java.util.*
 
 
-class GeofenceHelper(private val context: Context) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+class GeofenceHelper(private val context: Context, private val remoteConfigManager: RemoteConfigManager) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private val googleApiClient: GoogleApiClient
-
-    // TODO replace from Remote config
-    val GEOFENCE_RADIUS_IN_METERS = 150f
-//    val GEOFENCE_LOYTERING_DELAY_MS = 1000 * 2
-    val GEOFENCE_LOYTERING_DELAY_MS = 1000
 
     private var geofencePendingIntent: PendingIntent? = null
     private val geofenceList = ArrayList<Geofence>()
@@ -90,20 +86,23 @@ class GeofenceHelper(private val context: Context) : GoogleApiClient.ConnectionC
         if (regions.isEmpty()) {
             AppLog.d("Clearing all regions")
         } else {
+            val geofenceRadiusInMeters = remoteConfigManager.getGeofenceRadiusInMeters()
+            val geofenceLoiteringDelayMs = remoteConfigManager.getGeofenceLoiteringDelayInMilliseconds()
+
             for (region in regions) {
                 AppLog.d("Adding region ${region.id} latitude ${region.latitude} " +
-                        "longitude ${region.longitude} radius ${GEOFENCE_RADIUS_IN_METERS}m " +
-                        "loytering delay ${GEOFENCE_LOYTERING_DELAY_MS}ms")
+                        "longitude ${region.longitude} radius ${geofenceRadiusInMeters}m " +
+                        "loytering delay ${geofenceLoiteringDelayMs}ms")
 
                 geofenceList.add(Geofence.Builder()
                         .setRequestId(region.id)
                         .setCircularRegion(
                                 region.latitude,
                                 region.longitude,
-                                GEOFENCE_RADIUS_IN_METERS
+                                geofenceRadiusInMeters
                         )
                         .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                        .setLoiteringDelay(GEOFENCE_LOYTERING_DELAY_MS)
+                        .setLoiteringDelay(geofenceLoiteringDelayMs)
                         .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
                         .build())
             }
