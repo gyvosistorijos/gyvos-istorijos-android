@@ -40,11 +40,11 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     override fun onAttach(view: View) {
-        val imageHeight = resources.getDimensionPixelSize(R.dimen.image_height)
+        val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
         val attractorHeightOffset =
-                resources.getDimensionPixelOffset(R.dimen.attractor_height_offset)
+                resources!!.getDimensionPixelOffset(R.dimen.attractor_height_offset)
         val attractorHeightDelta =
-                resources.getDimensionPixelOffset(R.dimen.attractor_height_delta)
+                resources!!.getDimensionPixelOffset(R.dimen.attractor_height_delta)
 
         showStoryAnimator = ValueAnimator.ofFloat(
                 (imageHeight - attractorHeightOffset - attractorHeightDelta).toFloat(),
@@ -66,13 +66,13 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             map.markerViewManager.setOnMarkerViewClickListener(this)
         }
 
-        val stories = StoryDb(applicationContext).getAll()
+        val stories = StoryDb(applicationContext!!).getAll()
         map.clear()
         storyMarkers.clear()
         markerIdToStory.clear()
         for (story in stories) {
             val marker = map.addMarker(MarkerViewOptions()
-                    .icon(IconFactory.getInstance(activity)
+                    .icon(IconFactory.getInstance(activity!!)
                             .fromResource(R.drawable.dot))
                     .flat(true)
                     .position(LatLng(story.latitude, story.longitude)))
@@ -84,7 +84,7 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             storyMarkers.add(marker)
         }
 
-        locationServices = LocationServices.getLocationServices(applicationContext)
+        locationServices = LocationServices.getLocationServices(applicationContext!!)
         onLocationChanged(locationServices.lastLocation)
         locationServices.addLocationListener(this)
         map.isMyLocationEnabled = true
@@ -148,20 +148,20 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
     private fun showShowStory() {
         showStoryAnimator.start()
-        view.showStoryButton.visibility = View.VISIBLE
-        view.showStoryImage.visibility = View.VISIBLE
+        view!!.showStoryButton.visibility = View.VISIBLE
+        view!!.showStoryImage.visibility = View.VISIBLE
         updateShowStoryButton()
     }
 
     private fun updateShowStoryButton() {
         Picasso.with(activity)
-                .load(activeStory!!.url).fit().centerCrop().into(view.showStoryImage)
+                .load(activeStory!!.url).fit().centerCrop().into(view!!.showStoryImage)
     }
 
     private fun hideShowStory() {
         showStoryAnimator.cancel()
-        view.showStoryButton.visibility = View.INVISIBLE
-        view.showStoryImage.visibility = View.INVISIBLE
+        view!!.showStoryButton.visibility = View.INVISIBLE
+        view!!.showStoryImage.visibility = View.INVISIBLE
     }
 
     internal fun clickShowStory() {

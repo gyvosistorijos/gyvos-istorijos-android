@@ -23,9 +23,9 @@ class SyncController : Controller() {
     }
 
     private fun syncStories() {
-        view.syncProgress.show()
-        view.syncRetryButton.visibility = View.GONE
-        view.syncPrompt.visibility = View.GONE
+        view!!.syncProgress.show()
+        view!!.syncRetryButton.visibility = View.GONE
+        view!!.syncPrompt.visibility = View.GONE
 
         Api.getStoriesService().listStories().enqueue(object : Callback<List<Story>> {
             override fun onResponse(call: Call<List<Story>>, response: Response<List<Story>>) {
@@ -47,7 +47,7 @@ class SyncController : Controller() {
             return
         }
 
-        val db = StoryDb(applicationContext)
+        val db = StoryDb(applicationContext!!)
         for (story in stories) {
             db.insert(story)
         }
@@ -60,14 +60,14 @@ class SyncController : Controller() {
             return
         }
 
-        val db = StoryDb(applicationContext)
+        val db = StoryDb(applicationContext!!)
         if (db.getAll().isNotEmpty()) {
             router.replaceTopController(RouterTransaction.with(PermissionsController()))
             return
         }
 
-        view.syncProgress.hide()
-        view.syncRetryButton.visibility = View.VISIBLE
-        view.syncPrompt.visibility = View.VISIBLE
+        view!!.syncProgress.hide()
+        view!!.syncRetryButton.visibility = View.VISIBLE
+        view!!.syncPrompt.visibility = View.VISIBLE
     }
 }

@@ -24,7 +24,7 @@ class PermissionsController : Controller() {
     }
 
     override fun onAttach(view: View) {
-        locationServices = LocationServices.getLocationServices(applicationContext)
+        locationServices = LocationServices.getLocationServices(applicationContext!!)
 
         // Check if user has granted location permission
         if (!locationServices.areLocationPermissionsGranted()) {
