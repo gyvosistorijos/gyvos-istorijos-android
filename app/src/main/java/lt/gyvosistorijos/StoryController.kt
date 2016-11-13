@@ -39,31 +39,31 @@ class StoryController(args: Bundle) : Controller(args) {
 
     private fun bindStory(story: Story) {
         if (!story.url.isNullOrBlank()) {
-            view.storyImage.visibility = View.VISIBLE
+            view!!.storyImage.visibility = View.VISIBLE
             Picasso.with(activity).load(story.url)
                     .fit().centerCrop()
                     .placeholder(R.color.imagePlaceholder)
-                    .into(view.storyImage)
+                    .into(view!!.storyImage)
         } else {
-            view.storyImage.visibility = View.GONE
+            view!!.storyImage.visibility = View.GONE
         }
 
-        view.storyText.text = @Suppress("DEPRECATION") (Html.fromHtml(story.text))
-        Linkify.addLinks(view.storyText, Linkify.WEB_URLS)
+        view!!.storyText.text = @Suppress("DEPRECATION") (Html.fromHtml(story.text))
+        Linkify.addLinks(view!!.storyText, Linkify.WEB_URLS)
 
         if (!story.author.isNullOrBlank()) {
-            view.storyAuthor.text = story.author
-            view.storyAuthor.visibility = View.VISIBLE
-            view.storyAuthorImage.visibility = View.VISIBLE
+            view!!.storyAuthor.text = story.author
+            view!!.storyAuthor.visibility = View.VISIBLE
+            view!!.storyAuthorImage.visibility = View.VISIBLE
         } else {
-            view.storyAuthor.visibility = View.GONE
-            view.storyAuthorImage.visibility = View.GONE
+            view!!.storyAuthor.visibility = View.GONE
+            view!!.storyAuthorImage.visibility = View.GONE
         }
 
-        storyAnimator.animateInStory(view.storyContainer)
+        storyAnimator.animateInStory(view!!.storyContainer)
 
-        view.hideStoryButton.alpha = 0f
-        view.hideStoryButton.animate()
+        view!!.hideStoryButton.alpha = 0f
+        view!!.hideStoryButton.animate()
                 .alpha(1f)
                 .setListener(null)
     }
@@ -74,11 +74,11 @@ class StoryController(args: Bundle) : Controller(args) {
         }
 
         animatingOut = true
-        view.hideStoryButton.animate().alpha(0f)
-        storyAnimator.animateOutStory(view.storyContainer, object : AnimatorListenerAdapter() {
+        view!!.hideStoryButton.animate().alpha(0f)
+        storyAnimator.animateOutStory(view!!.storyContainer, object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 // render last frame of animation before popping
-                view.post { router.popCurrentController() }
+                view!!.post { router.popCurrentController() }
             }
         })
     }
