@@ -11,9 +11,7 @@ class CrashReportingTree : Timber.Tree() {
             return
         }
 
-        val message = "$tag: $message"
-
-        FirebaseCrash.log(message)
+        FirebaseCrash.log("$tag: $message")
 
         t?.let { FirebaseCrash::report }
     }
