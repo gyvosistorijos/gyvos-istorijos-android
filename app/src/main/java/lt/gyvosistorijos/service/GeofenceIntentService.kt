@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.NotificationCompat
 import android.text.TextUtils
@@ -94,7 +93,6 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         // Push the content Intent onto the stack.
         stackBuilder.addNextIntent(notificationIntent)
 
-
         // Get a PendingIntent containing the entire back stack.
         val notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
@@ -103,10 +101,8 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
 
         // Define the notification settings.
         builder.setSmallIcon(R.mipmap.ic_launcher)
-                .setColor(Color.RED)
                 .setContentTitle(getString(R.string.geofence_notification_text))
-                .setContentIntent(notificationPendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_MIN
 
         // Get an instance of the Notification manager
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
