@@ -192,4 +192,4 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
     }
 }
 
-class GeofenceRegion(val id: String, val latitude: Double, val longitude: Double)
+data class GeofenceRegion(val id: String, val latitude: Double, val longitude: Double)
