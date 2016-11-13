@@ -1,9 +1,9 @@
 package lt.gyvosistorijos.location
 
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.FragmentActivity
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResultCallback
@@ -17,7 +17,9 @@ import timber.log.Timber
 import java.util.*
 
 
-class GeofenceHelper(private val context: Context, private val remoteConfigManager: RemoteConfigManager) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+class GeofenceHelper(private val fragmentActivity: FragmentActivity,
+                     private val remoteConfigManager: RemoteConfigManager) :
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private val googleApiClient: GoogleApiClient
 
@@ -32,17 +34,11 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
 
 
     init {
-        googleApiClient = GoogleApiClient.Builder(context)
+        googleApiClient = GoogleApiClient.Builder(fragmentActivity)
+                .enableAutoManage(fragmentActivity, 0, this)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build()
-    }
-
-    fun connect() {
-        if (!isConnected) {
-            googleApiClient.connect()
-        }
     }
 
     override fun onConnected(bundle: Bundle?) {
@@ -63,17 +59,6 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
 
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
         Timber.w("GoogleApiClient connection failed " + connectionResult)
-    }
-
-    val isConnected: Boolean
-        get() = googleApiClient.isConnected
-
-    /**
-     * Safe to call without having called [.connect] first.
-     */
-    fun disconnect() {
-        Timber.d("disconnect")
-        googleApiClient.disconnect()
     }
 
     fun setGeofenceRegions(regions: List<GeofenceRegion>) {
@@ -172,8 +157,7 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
 
     private fun buildGeofencingRequest(): GeofencingRequest {
         val builder = GeofencingRequest.Builder()
-        builder.setInitialTrigger(
-                GeofencingRequest.INITIAL_TRIGGER_ENTER or GeofencingRequest.INITIAL_TRIGGER_DWELL)
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
         builder.addGeofences(geofenceList)
         return builder.build()
     }
@@ -184,10 +168,10 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
             return geofencePendingIntent
         }
 
-        val intent = Intent(context, GeofenceIntentService::class.java)
+        val intent = Intent(fragmentActivity, GeofenceIntentService::class.java)
         // Use FLAG_UPDATE_CURRENT so same PendingIntent is returned for adding & removing geofences
         geofencePendingIntent = PendingIntent
-                .getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                .getService(fragmentActivity, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         return geofencePendingIntent
     }
 }

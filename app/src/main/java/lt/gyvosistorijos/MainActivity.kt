@@ -48,12 +48,7 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
-
-    override fun onStart() {
-        super.onStart()
-        geofenceHelper.connect()
-    }
-
+    
     override fun onResume() {
         super.onResume()
         mapView.onResume()
@@ -64,10 +59,6 @@ class MainActivity : AppCompatActivity() {
         mapView.onPause()
     }
 
-    override fun onStop() {
-        super.onStop()
-        geofenceHelper.disconnect()
-    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
