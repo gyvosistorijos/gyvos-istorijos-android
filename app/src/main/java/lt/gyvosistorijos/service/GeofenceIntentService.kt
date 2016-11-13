@@ -105,10 +105,10 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                 .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_MIN
 
         // Get an instance of the Notification manager
-        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Issue the notification
-        mNotificationManager.notify(0, builder.build())
+        notificationManager.notify(0, builder.build())
     }
 
 
