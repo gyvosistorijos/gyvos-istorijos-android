@@ -13,7 +13,7 @@ import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.service.GeofenceIntentService
-import lt.gyvosistorijos.utils.AppLog
+import timber.log.Timber
 import java.util.*
 
 
@@ -46,7 +46,7 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
     }
 
     override fun onConnected(bundle: Bundle?) {
-        AppLog.i("Connected to GoogleApiClient");
+        Timber.i("Connected to GoogleApiClient");
 
         if (isGeofenceReplacePending) {
             replaceGeofences()
@@ -56,13 +56,13 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
 
     override fun onConnectionSuspended(i: Int) {
         // The connection to Google Play services was lost for some reason.
-        AppLog.i("Connection suspended");
+        Timber.i("Connection suspended");
 
         // onConnected() will be called again automatically when the service reconnects
     }
 
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        AppLog.w("GoogleApiClient connection failed " + connectionResult)
+        Timber.w("GoogleApiClient connection failed " + connectionResult)
     }
 
     val isConnected: Boolean
@@ -72,7 +72,7 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
      * Safe to call without having called [.connect] first.
      */
     fun disconnect() {
-        AppLog.d("disconnect")
+        Timber.d("disconnect")
         googleApiClient.disconnect()
     }
 
@@ -84,13 +84,13 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
     private fun buildGeofenceList(regions: List<GeofenceRegion>) {
         geofenceList.clear()
         if (regions.isEmpty()) {
-            AppLog.d("Clearing all regions")
+            Timber.d("Clearing all regions")
         } else {
             val geofenceRadiusInMeters = remoteConfigManager.getGeofenceRadiusInMeters()
             val geofenceLoiteringDelayMs = remoteConfigManager.getGeofenceLoiteringDelayInMilliseconds()
 
             for (region in regions) {
-                AppLog.d("Adding region ${region.id} latitude ${region.latitude} " +
+                Timber.d("Adding region ${region.id} latitude ${region.latitude} " +
                         "longitude ${region.longitude} radius ${geofenceRadiusInMeters}m " +
                         "loytering delay ${geofenceLoiteringDelayMs}ms")
 
@@ -124,13 +124,13 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
      * Removes any existing geofences and adds all in [.geofenceList].
      */
     private fun replaceGeofences() {
-        AppLog.i("Replacing geofences")
+        Timber.i("Replacing geofences")
 
         LocationServices.GeofencingApi.removeGeofences(
                 googleApiClient,
                 getGeofencePendingIntent()
         ).setResultCallback(ResultCallback<Status> { status ->
-            AppLog.d("Remove geofences result: " + status)
+            Timber.d("Remove geofences result: " + status)
             if (status.isSuccess) {
                 if (geofenceList.isEmpty()) {
                     // If list is empty, there aren't any geofences to add, so quit early
@@ -150,7 +150,7 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
                         buildGeofencingRequest(),
                         getGeofencePendingIntent()
                 ).setResultCallback { status ->
-                    AppLog.d("Add geofences result: " + status)
+                    Timber.d("Add geofences result: " + status)
                     if (!status.isSuccess) {
                         onReplaceGeofencesFailure(getFailure(status))
                     }
@@ -166,7 +166,7 @@ class GeofenceHelper(private val context: Context, private val remoteConfigManag
     }
 
     private fun onReplaceGeofencesFailure(e: Exception) {
-        AppLog.e(e)
+        Timber.e(e)
         isGeofenceReplacePending = true
     }
 

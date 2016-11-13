@@ -14,7 +14,7 @@ import com.google.android.gms.location.GeofencingEvent
 import lt.gyvosistorijos.MainActivity
 import lt.gyvosistorijos.R
 import lt.gyvosistorijos.location.GeofenceErrorMessages
-import lt.gyvosistorijos.utils.AppLog
+import timber.log.Timber
 
 
 /**
@@ -41,7 +41,7 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         if (geofencingEvent.hasError()) {
             val errorMessage = GeofenceErrorMessages.getErrorString(this,
                     geofencingEvent.errorCode)
-            AppLog.e(errorMessage)
+            Timber.e(errorMessage)
 
             return
         }
@@ -61,7 +61,7 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
 
         // Send notification and log the transition details.
         sendNotification()
-        AppLog.i(geofenceTransitionDetails)
+        Timber.i(geofenceTransitionDetails)
     }
 
     private fun getGeofenceTransitionDetails(

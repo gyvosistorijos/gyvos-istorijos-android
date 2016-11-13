@@ -4,7 +4,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import lt.gyvosistorijos.BuildConfig
 import lt.gyvosistorijos.R
-import lt.gyvosistorijos.utils.AppLog
+import timber.log.Timber
 
 
 class RemoteConfigManager private constructor() {
@@ -12,7 +12,7 @@ class RemoteConfigManager private constructor() {
     private val config: FirebaseRemoteConfig
 
     init {
-        AppLog.i("Initializing remote config")
+        Timber.i("Initializing remote config")
 
         config = FirebaseRemoteConfig.getInstance()
         val configSettings = FirebaseRemoteConfigSettings.Builder()
@@ -23,14 +23,14 @@ class RemoteConfigManager private constructor() {
     }
 
     fun fetchConfig() {
-        AppLog.d("Started fetching remote config")
+        Timber.d("Started fetching remote config")
 
         config.fetch(FETCH_CACHE_EXPIRE_TIME).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                AppLog.d("Remote config fetch successful")
+                Timber.d("Remote config fetch successful")
                 config.activateFetched()
             } else {
-                AppLog.e("Remote config fetch failed")
+                Timber.e("Remote config fetch failed")
             }
         }
     }
@@ -43,7 +43,9 @@ class RemoteConfigManager private constructor() {
         return (config.getLong(GEOFENCE_LOITERING_DELAY_IN_SECONDS) * 1000).toInt()
     }
 
-    private object Holder { val INSTANCE = RemoteConfigManager() }
+    private object Holder {
+        val INSTANCE = RemoteConfigManager()
+    }
 
     companion object {
 
