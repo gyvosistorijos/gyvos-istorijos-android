@@ -18,7 +18,7 @@ apply plugin: 'com.squareup.sqldelight'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion="25.0.0"
+    buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "lt.gyvosistorijos"
         minSdkVersion 19
@@ -87,7 +87,7 @@ dependencies {
     compile "com.google.firebase:firebase-messaging:$firebaseVersion"
     compile "com.google.firebase:firebase-crash:$firebaseVersion"
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 }
 
 repositories {
