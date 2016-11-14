@@ -17,7 +17,6 @@ class StoryDb(context: Context) :
         onCreate(db)
     }
 
-
     fun insert(story: Story) {
         writableDatabase.insert(Story.TABLE_NAME, null,
                 Story.FACTORY.marshal(story).asContentValues())

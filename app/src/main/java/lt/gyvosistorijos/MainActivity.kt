@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var geofenceHelper: GeofenceHelper
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
