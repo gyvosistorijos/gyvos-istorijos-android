@@ -173,6 +173,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
     internal fun clickShowStory() {
         hideShowStory()
+
+        AppEvent.trackStoryClicked(activity!!, activeStory!!.id())
         router.pushController(RouterTransaction.with(StoryController(activeStory!!)))
     }
 
