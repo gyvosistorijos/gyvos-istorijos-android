@@ -9,11 +9,13 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.mapbox.mapboxsdk.location.LocationServices
 import kotlinx.android.synthetic.main.controller_permissions.view.*
+import lt.gyvosistorijos.utils.AppEvent
 
 class PermissionsController : Controller() {
 
     companion object {
         val REQUEST_PERMISSIONS_LOCATION = 0
+        val SCREEN_NAME = "Permissions"
     }
 
     internal lateinit var locationServices: LocationServices
@@ -24,6 +26,8 @@ class PermissionsController : Controller() {
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
+
         locationServices = LocationServices.getLocationServices(applicationContext!!)
 
         // Check if user has granted location permission

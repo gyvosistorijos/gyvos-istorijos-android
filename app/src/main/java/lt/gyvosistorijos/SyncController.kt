@@ -6,11 +6,17 @@ import android.view.ViewGroup
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import kotlinx.android.synthetic.main.controller_sync.view.*
+import lt.gyvosistorijos.location.GeofenceRegion
+import lt.gyvosistorijos.utils.AppEvent
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class SyncController : Controller() {
+
+    companion object {
+        val SCREEN_NAME = "Sync"
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_sync, container, false)
@@ -18,6 +24,8 @@ class SyncController : Controller() {
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
+
         view.syncRetryButton.setOnClickListener { syncStories() }
         syncStories()
     }
@@ -52,7 +60,15 @@ class SyncController : Controller() {
             db.insert(story)
         }
 
+        setGeofencingStories(stories)
+
         router.replaceTopController(RouterTransaction.with(PermissionsController()))
+    }
+
+    private fun setGeofencingStories(stories: List<Story>) {
+        val geofenceRegions = stories.map { s -> GeofenceRegion.ModelMapper.from(s) }
+
+        (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
 
     private fun onFailure() {

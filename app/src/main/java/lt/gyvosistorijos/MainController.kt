@@ -20,9 +20,14 @@ import com.mapbox.mapboxsdk.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
+import lt.gyvosistorijos.utils.AppEvent
 import java.util.*
 
 class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, LocationListener {
+
+    companion object {
+        val SCREEN_NAME = "Main"
+    }
 
     internal lateinit var showStoryAnimator: ValueAnimator
     internal lateinit var map: MapboxMap
@@ -40,6 +45,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
+
         val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
         val attractorHeightOffset =
                 resources!!.getDimensionPixelOffset(R.dimen.attractor_height_offset)
@@ -166,6 +173,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
     internal fun clickShowStory() {
         hideShowStory()
+
+        AppEvent.trackStoryClicked(activity!!, activeStory!!.id())
         router.pushController(RouterTransaction.with(StoryController(activeStory!!)))
     }
 

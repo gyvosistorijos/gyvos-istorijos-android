@@ -13,8 +13,13 @@ import com.bluelinelabs.conductor.Controller
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_story.view.*
+import lt.gyvosistorijos.utils.AppEvent
 
 class StoryController(args: Bundle) : Controller(args) {
+
+    companion object {
+        val SCREEN_NAME = "Story"
+    }
 
     constructor(story: Story) : this(Story.toBundle(story))
 
@@ -30,6 +35,8 @@ class StoryController(args: Bundle) : Controller(args) {
     }
 
     override fun onAttach(view: View) {
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
+
         map = (activity as MainActivity).map
         map.isMyLocationEnabled = false
 
