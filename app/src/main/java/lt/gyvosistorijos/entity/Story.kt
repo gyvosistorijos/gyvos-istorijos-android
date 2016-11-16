@@ -2,6 +2,7 @@ package lt.gyvosistorijos.entity
 
 import android.os.Bundle
 import com.squareup.moshi.Json
+import lt.gyvosistorijos.location.GeofenceRegion
 
 class Story(
         val id: String,
@@ -14,6 +15,10 @@ class Story(
 ) {
 
     companion object {
+
+        fun toGeofenceRegion(story: Story): GeofenceRegion {
+            return GeofenceRegion(story.id, story.latitude, story.longitude)
+        }
 
         fun toBundle(story: Story): Bundle {
             val b = Bundle()
