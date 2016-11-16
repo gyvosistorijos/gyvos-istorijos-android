@@ -1,6 +1,6 @@
 package lt.gyvosistorijos.location
 
-import lt.gyvosistorijos.Story
+import lt.gyvosistorijos.entity.Story
 
 data class GeofenceRegion(val id: String, val latitude: Double, val longitude: Double) {
 

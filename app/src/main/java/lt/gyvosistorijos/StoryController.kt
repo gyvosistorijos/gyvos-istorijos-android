@@ -13,6 +13,7 @@ import com.bluelinelabs.conductor.Controller
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_story.view.*
+import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.utils.AppEvent
 
 class StoryController(args: Bundle) : Controller(args) {

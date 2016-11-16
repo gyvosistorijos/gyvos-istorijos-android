@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
+import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.utils.AppEvent
 import java.util.*
 
@@ -73,7 +74,7 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             map.markerViewManager.setOnMarkerViewClickListener(this)
         }
 
-        val stories = StoryDb(applicationContext!!).getAll()
+        val stories = StoryDb.getAll()
         map.clear()
         storyMarkers.clear()
         markerIdToStory.clear()
@@ -174,7 +175,7 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     internal fun clickShowStory() {
         hideShowStory()
 
-        AppEvent.trackStoryClicked(activity!!, activeStory!!.id())
+        AppEvent.trackStoryClicked(activity!!, activeStory!!.id)
         router.pushController(RouterTransaction.with(StoryController(activeStory!!)))
     }
 

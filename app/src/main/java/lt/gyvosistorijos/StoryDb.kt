@@ -1,34 +1,52 @@
 package lt.gyvosistorijos
 
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
-import java.util.*
+import io.realm.Realm
+import lt.gyvosistorijos.entity.Story
+import lt.gyvosistorijos.entity.realm.StoryRealm
 
-class StoryDb(context: Context) :
-        SQLiteOpenHelper(context, "story.db", null, 1) {
+object StoryDb {
 
-    override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(Story.CREATE_TABLE)
+    private fun <T> withRealm(func: (realm: Realm) -> T): T {
+        val realm = Realm.getDefaultInstance()
+
+        try {
+            return func(realm)
+        } finally {
+            realm.close()
+        }
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE " + Story.TABLE_NAME)
-        onCreate(db)
-    }
+    fun insert(stories: List<Story>) {
+        val realmStories = stories.map { s -> StoryRealm.fromStory(s) }
 
-    fun insert(story: Story) {
-        writableDatabase.insert(Story.TABLE_NAME, null,
-                Story.FACTORY.marshal(story).asContentValues())
+
+        withRealm { realm ->
+            realm.executeTransaction {
+                realm.delete(StoryRealm::class.java)
+                realm.copyToRealm(realmStories)
+            }
+        }
+
     }
 
     fun getAll(): List<Story> {
-        val result = ArrayList<Story>()
-        readableDatabase.rawQuery(Story.SELECT_ALL, null).use {
-            while (it.moveToNext()) {
-                result.add(Story.MAPPER.map(it))
-            }
+        val stories = withRealm { realm ->
+            val realmStories = realm.where(StoryRealm::class.java).findAll()
+
+            realm.copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
         }
-        return result
+
+        return stories
+    }
+
+    fun getByIds(ids: List<String>): List<Story> {
+        val stories = withRealm { realm ->
+            val realmStories = realm.where(StoryRealm::class.java).
+                    `in`(StoryRealm::id.name, ids.toTypedArray()).findAll()
+
+            realm.copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
+        }
+
+        return stories
     }
 }

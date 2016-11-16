@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import kotlinx.android.synthetic.main.controller_sync.view.*
+import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.GeofenceRegion
 import lt.gyvosistorijos.utils.AppEvent
 import retrofit2.Call
@@ -55,10 +56,8 @@ class SyncController : Controller() {
             return
         }
 
-        val db = StoryDb(applicationContext!!)
-        for (story in stories) {
-            db.insert(story)
-        }
+        StoryDb.insert(stories)
+
 
         setGeofencingStories(stories)
 
@@ -76,8 +75,7 @@ class SyncController : Controller() {
             return
         }
 
-        val db = StoryDb(applicationContext!!)
-        if (db.getAll().isNotEmpty()) {
+        if (StoryDb.getAll().isNotEmpty()) {
             router.replaceTopController(RouterTransaction.with(PermissionsController()))
             return
         }
