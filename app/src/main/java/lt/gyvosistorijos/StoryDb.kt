@@ -7,13 +7,7 @@ import lt.gyvosistorijos.entity.realm.StoryRealm
 object StoryDb {
 
     private fun <T> withRealm(func: (realm: Realm) -> T): T {
-        val realm = Realm.getDefaultInstance()
-
-        try {
-            return func(realm)
-        } finally {
-            realm.close()
-        }
+        return Realm.getDefaultInstance().use { func(it) }
     }
 
     fun insert(stories: List<Story>) {
