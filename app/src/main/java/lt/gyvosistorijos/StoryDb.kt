@@ -6,39 +6,35 @@ import lt.gyvosistorijos.entity.realm.StoryRealm
 
 object StoryDb {
 
-    private fun <T> withRealm(func: (realm: Realm) -> T): T {
+    private fun <T> withRealm(func: Realm.() -> T): T {
         return Realm.getDefaultInstance().use { func(it) }
     }
 
     fun insert(stories: List<Story>) {
         val realmStories = stories.map { s -> StoryRealm.fromStory(s) }
 
-
-        withRealm { realm ->
-            realm.executeTransaction {
-                realm.delete(StoryRealm::class.java)
-                realm.copyToRealm(realmStories)
+        withRealm {
+            executeTransaction {
+                delete(StoryRealm::class.java)
+                copyToRealm(realmStories)
             }
         }
-
     }
 
     fun getAll(): List<Story> {
-        val stories = withRealm { realm ->
-            val realmStories = realm.where(StoryRealm::class.java).findAll()
-
-            realm.copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
+        val stories = withRealm {
+            val realmStories = where(StoryRealm::class.java).findAll()
+            copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
         }
 
         return stories
     }
 
     fun getByIds(ids: List<String>): List<Story> {
-        val stories = withRealm { realm ->
-            val realmStories = realm.where(StoryRealm::class.java).
+        val stories = withRealm {
+            val realmStories = where(StoryRealm::class.java).
                     `in`(StoryRealm::id.name, ids.toTypedArray()).findAll()
-
-            realm.copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
+            copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
         }
 
         return stories
