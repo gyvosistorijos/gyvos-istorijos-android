@@ -59,13 +59,11 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         val triggeringGeofences = geofencingEvent.triggeringGeofences
         val triggeringGeofencesIdsList = triggeringGeofences.map { it.requestId }
 
-        val geofenceTransitionDetails = getGeofenceTransitionDetails(
+        logGeofenceTransitionDetails(
                 geofenceTransition,
                 triggeredLocation,
                 triggeringGeofencesIdsList
         )
-
-        Timber.i(geofenceTransitionDetails)
 
         val triggeredStory = getTriggeredStory(triggeringGeofencesIdsList)
 
@@ -76,14 +74,14 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         return StoryDb.getByIds(storyIds).first()
     }
 
-    private fun getGeofenceTransitionDetails(
+    private fun logGeofenceTransitionDetails(
             transition: Int,
             triggeredLocation: Location?,
-            triggeringGeofencesIdsList: List<String>): String {
+            triggeringGeofencesIdsList: List<String>) {
 
         val triggeringGeofencesIdsString = TextUtils.join(", ", triggeringGeofencesIdsList)
 
-        return "Geofence triggered at $triggeredLocation with transition $transition: $triggeringGeofencesIdsString"
+        Timber.i("Geofence triggered at $triggeredLocation with transition $transition: $triggeringGeofencesIdsString")
     }
 
     // Picasso holds Target instance with weak reference.
