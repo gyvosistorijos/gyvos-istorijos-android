@@ -7,4 +7,7 @@
     <color name="imagePlaceholder">#4FFF</color>
     <color name="base">#EBE3CD</color>
     <color name="baseTransparent">#00EBE3CD</color>
+
+    <color name="markerForeground">@color/colorAccent</color>
+    <color name="markerBackground">#88B28EB8</color>
 </resources>
