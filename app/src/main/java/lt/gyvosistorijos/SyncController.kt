@@ -11,6 +11,7 @@ import lt.gyvosistorijos.utils.AppEvent
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 class SyncController : Controller() {
 
@@ -35,6 +36,11 @@ class SyncController : Controller() {
         view!!.syncRetryButton.visibility = View.GONE
         view!!.syncPrompt.visibility = View.GONE
 
+        val cachedStories = StoryDb.getAll()
+        if (cachedStories.isNotEmpty()) {
+            loadPermissionController()
+        }
+
         Api.getStoriesService().listStories().enqueue(object : Callback<List<Story>> {
             override fun onResponse(call: Call<List<Story>>, response: Response<List<Story>>) {
                 if (response.isSuccessful) {
@@ -51,16 +57,16 @@ class SyncController : Controller() {
     }
 
     private fun onSuccess(stories: List<Story>) {
-        if (!isAttached) {
-            return
-        }
-
+        Timber.d("Got ${stories.size} stories from API")
         StoryDb.insert(stories)
 
-
         setGeofencingStories(stories)
+        loadPermissionController()
+    }
 
-        router.replaceTopController(RouterTransaction.with(PermissionsController()))
+    private fun loadPermissionController() {
+        if (isAttached)
+            router.replaceTopController(RouterTransaction.with(PermissionsController()))
     }
 
     private fun setGeofencingStories(stories: List<Story>) {
@@ -75,7 +81,7 @@ class SyncController : Controller() {
         }
 
         if (StoryDb.getAll().isNotEmpty()) {
-            router.replaceTopController(RouterTransaction.with(PermissionsController()))
+            loadPermissionController()
             return
         }
 
