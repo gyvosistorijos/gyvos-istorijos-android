@@ -39,8 +39,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         RemoteConfigManager.instance.fetchConfig()
-
-        geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
     }
 
     override fun onBackPressed() {
