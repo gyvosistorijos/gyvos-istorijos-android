@@ -1,4 +1,4 @@
-package lt.gyvosistorijos
+package lt.gyvosistorijos.location
 
 import android.Manifest
 import android.content.Context
@@ -50,7 +50,7 @@ internal class LocationService(activity: FragmentActivity) : LocationListener,
     }
 
     val lastLocation: Location?
-        @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         get() = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
 
     fun addLocationListener(listener: LocationListener) {
@@ -61,7 +61,7 @@ internal class LocationService(activity: FragmentActivity) : LocationListener,
         listeners.remove(listener)
     }
 
-    @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     fun start() {
         if (googleApiClient.isConnected) {
             startInternal()
