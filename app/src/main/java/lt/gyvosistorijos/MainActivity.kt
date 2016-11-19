@@ -12,22 +12,24 @@ import lt.gyvosistorijos.manager.RemoteConfigManager
 
 class MainActivity : AppCompatActivity() {
 
-    internal lateinit var router: Router
     companion object {
         val MAP_SAVED_STATE_KEY = "map"
     }
 
+    internal var router: Router? = null
 
-    internal lateinit var geofenceHelper: GeofenceHelper
     internal lateinit var map: GoogleMap
 
+    internal lateinit var geofenceHelper: GeofenceHelper
     internal lateinit var locationService: LocationService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        router = Conductor.attachRouter(this, controller_container, savedInstanceState)
+        RemoteConfigManager.instance.fetchConfig()
+
+        geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
         locationService = LocationService(this)
 
         mapView.onCreate(savedInstanceState?.getBundle(MAP_SAVED_STATE_KEY))
@@ -41,14 +43,17 @@ class MainActivity : AppCompatActivity() {
 
             map.uiSettings.isMyLocationButtonEnabled = false
 
+            val router = Conductor.attachRouter(this, controller_container, savedInstanceState)
             if (!router.hasRootController()) {
                 router.setRoot(RouterTransaction.with(SyncController()))
             }
+            this.router = router
         }
     }
 
     override fun onBackPressed() {
-        if (!router.handleBack()) {
+        val handled = router?.handleBack() ?: false
+        if (!handled) {
             super.onBackPressed()
         }
     }
