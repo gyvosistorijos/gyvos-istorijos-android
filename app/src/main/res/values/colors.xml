@@ -5,6 +5,7 @@
     <color name="colorAccent">#AB38B8</color>
 
     <color name="imagePlaceholder">#4FFF</color>
+    <color name="storyScrim">#C000</color>
     <color name="base">#EBE3CD</color>
     <color name="baseTransparent">#00EBE3CD</color>
 

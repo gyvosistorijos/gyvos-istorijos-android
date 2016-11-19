@@ -70,10 +70,11 @@ class StoryController(args: Bundle) : Controller(args) {
 
         storyAnimator.animateInStory(view!!.storyContainer)
 
+        view!!.storyScrim.alpha = 0f
+        view!!.storyScrim.animate().alpha(1f)
+
         view!!.hideStoryButton.alpha = 0f
-        view!!.hideStoryButton.animate()
-                .alpha(1f)
-                .setListener(null)
+        view!!.hideStoryButton.animate().alpha(1f)
     }
 
     internal fun clickHideButton() {
@@ -82,6 +83,7 @@ class StoryController(args: Bundle) : Controller(args) {
         }
 
         animatingOut = true
+        view!!.storyScrim.animate().alpha(0f)
         view!!.hideStoryButton.animate().alpha(0f)
         storyAnimator.animateOutStory(view!!.storyContainer, object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
