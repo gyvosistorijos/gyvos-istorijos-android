@@ -21,8 +21,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
 import lt.gyvosistorijos.entity.Story
-import lt.gyvosistorijos.location.GeofenceHelper
-import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
 import java.util.*
 
@@ -197,13 +195,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     private fun setGeofencingStories(stories: List<Story>) {
-        val mainActivity = activity as MainActivity
-
-        mainActivity.geofenceHelper =
-                GeofenceHelper(mainActivity, RemoteConfigManager.instance)
-
         val geofenceRegions = stories.map { s -> Story.toGeofenceRegion(s) }
 
-        mainActivity.geofenceHelper.setGeofenceRegions(geofenceRegions)
+        (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
 }
