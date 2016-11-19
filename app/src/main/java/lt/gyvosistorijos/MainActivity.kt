@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                 Timber.e("Style parsing failed.")
             }
         } catch (e: Resources.NotFoundException) {
-            Timber.e("MapsActivityRaw", "Can't find style.", e)
+            Timber.e(e, "Can't find style.")
         }
     }
 
