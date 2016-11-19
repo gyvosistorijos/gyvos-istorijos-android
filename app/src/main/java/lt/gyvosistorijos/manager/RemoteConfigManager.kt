@@ -25,7 +25,7 @@ class RemoteConfigManager private constructor() {
     fun fetchConfig() {
         Timber.d("Started fetching remote config")
 
-        config.fetch(FETCH_CACHE_EXPIRE_TIME_MS).addOnCompleteListener { task ->
+        config.fetch().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Timber.d("Remote config fetch successful")
                 config.activateFetched()
@@ -48,8 +48,6 @@ class RemoteConfigManager private constructor() {
     }
 
     companion object {
-
-        private val FETCH_CACHE_EXPIRE_TIME_MS = 60L * 60 * 1000 //1h
 
         private val GEOFENCE_RADIUS_IN_METERS = "geofence_radius_m"
         private val GEOFENCE_LOITERING_DELAY_IN_SECONDS = "geofence_loitering_s"
