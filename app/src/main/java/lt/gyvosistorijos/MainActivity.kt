@@ -32,15 +32,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         RemoteConfigManager.instance.fetchConfig()
-
         geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
         locationService = LocationService(this)
 
         mapView.onCreate(savedInstanceState?.getBundle(MAP_SAVED_STATE_KEY))
-
-        RemoteConfigManager.instance.fetchConfig()
-
-        geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
 
         mapView.getMapAsync { googleMap ->
             map = googleMap
