@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
 import lt.gyvosistorijos.entity.Story
+import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
 import java.util.*
 
@@ -119,8 +120,10 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
             zoomedIn = true
         }
 
+        val maxDistanceMeters = RemoteConfigManager.instance.getStoryRadiusInMeters()
+
         for (marker in storyMarkers) {
-            marker.alpha = getAlpha(marker.position, location)
+            marker.alpha = getAlpha(marker.position, location, maxDistanceMeters)
         }
 
         // find 'active' story, if one exists
@@ -129,13 +132,13 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         val userLocation = LatLng(location.latitude, location.longitude)
         for ((id, story) in markerIdToStory) {
             val distanceMeters =
-                    userLocation.distanceTo(LatLng(story.latitude, story.longitude))
+                    userLocation.distanceMetersTo(LatLng(story.latitude, story.longitude))
             if (distanceMeters < closestDistanceMeters) {
                 activeStory = story
                 closestDistanceMeters = distanceMeters
             }
         }
-        if (null != activeStory && closestDistanceMeters > 1000) {
+        if (closestDistanceMeters > maxDistanceMeters) {
             activeStory = null
         }
 
@@ -192,10 +195,11 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         locationService.stop()
     }
 
-    private fun getAlpha(markerPosition: LatLng, location: Location): Float {
+    private fun getAlpha(markerPosition: LatLng, location: Location,
+                         maxDistanceMeters: Float): Float {
         return Math.max(0.5f,
-                1 - markerPosition.distanceTo(
-                        LatLng(location.latitude, location.longitude)) / 1000)
+                1 - markerPosition.distanceMetersTo(
+                        LatLng(location.latitude, location.longitude)) / (2 * maxDistanceMeters))
     }
 
     private fun setGeofencingStories(stories: List<Story>) {
@@ -205,7 +209,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     }
 }
 
-private fun LatLng.distanceTo(other: LatLng): Float {
+private fun LatLng.distanceMetersTo(other: LatLng): Float {
     val distance = FloatArray(1)
     Location.distanceBetween(latitude, longitude, other.latitude, other.longitude, distance)
     return distance[0]

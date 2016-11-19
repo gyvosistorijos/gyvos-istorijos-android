@@ -43,6 +43,10 @@ class RemoteConfigManager private constructor() {
         return (config.getLong(GEOFENCE_LOITERING_DELAY_IN_SECONDS) * 1000).toInt()
     }
 
+    fun getStoryRadiusInMeters(): Float {
+        return config.getDouble(STORY_RADIUS_IN_METERS).toFloat()
+    }
+
     private object Holder {
         val INSTANCE = RemoteConfigManager()
     }
@@ -51,6 +55,7 @@ class RemoteConfigManager private constructor() {
 
         private val GEOFENCE_RADIUS_IN_METERS = "geofence_radius_m"
         private val GEOFENCE_LOITERING_DELAY_IN_SECONDS = "geofence_loitering_s"
+        private val STORY_RADIUS_IN_METERS = "story_radius_m"
 
         val instance: RemoteConfigManager by lazy { Holder.INSTANCE }
     }
