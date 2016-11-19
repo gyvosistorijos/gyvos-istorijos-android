@@ -104,7 +104,7 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
 
         val builder = NotificationCompat.Builder(this)
 
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(getString(R.string.geofence_notification_text))
                 .setContentText(story.text)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
