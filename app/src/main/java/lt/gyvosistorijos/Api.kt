@@ -1,5 +1,6 @@
 package lt.gyvosistorijos
 
+import lt.gyvosistorijos.entity.Story
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor

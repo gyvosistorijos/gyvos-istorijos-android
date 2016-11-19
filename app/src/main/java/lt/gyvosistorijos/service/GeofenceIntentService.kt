@@ -6,13 +6,19 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.location.Location
+import android.os.Handler
 import android.support.v7.app.NotificationCompat
 import android.text.TextUtils
-import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
 import lt.gyvosistorijos.MainActivity
 import lt.gyvosistorijos.R
+import lt.gyvosistorijos.StoryDb
+import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.GeofenceErrorMessages
 import timber.log.Timber
 
@@ -29,6 +35,7 @@ import timber.log.Timber
  * constructor with the name for a worker thread.
  */
 class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
+
 
     /**
      * Handles incoming intents.
@@ -47,68 +54,89 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         }
 
         val triggeredLocation = geofencingEvent.triggeringLocation
-        // Get the transition type.
         val geofenceTransition = geofencingEvent.geofenceTransition
         // Get the geofences that were triggered. A single event can trigger multiple geofences.
         val triggeringGeofences = geofencingEvent.triggeringGeofences
+        val triggeringGeofencesIdsList = triggeringGeofences.map { it.requestId }
 
-        // Get the transition details as a String.
-        val geofenceTransitionDetails = getGeofenceTransitionDetails(
+        logGeofenceTransitionDetails(
                 geofenceTransition,
                 triggeredLocation,
-                triggeringGeofences
+                triggeringGeofencesIdsList
         )
 
-        // Send notification and log the transition details.
-        sendNotification()
-        Timber.i(geofenceTransitionDetails)
+
+        val triggeredStory = StoryDb.getById(triggeringGeofencesIdsList.first())
+
+        if (triggeredStory != null) {
+            sendNotification(triggeredStory)
+        } else {
+            Timber.w("Triggered story is null. " +
+                    "TriggeringGeofencesIdsList = $triggeringGeofencesIdsList}")
+        }
     }
 
-    private fun getGeofenceTransitionDetails(
+    private fun logGeofenceTransitionDetails(
             transition: Int,
             triggeredLocation: Location?,
-            triggeringGeofences: List<Geofence>): String {
+            triggeringGeofencesIdsList: List<String>) {
 
-        // Get the Ids of each geofence that was triggered.
-        val triggeringGeofencesIdsList = triggeringGeofences.map { it.requestId }
         val triggeringGeofencesIdsString = TextUtils.join(", ", triggeringGeofencesIdsList)
 
-        return "Geofence triggered at $triggeredLocation with transition $transition: $triggeringGeofencesIdsString"
+        Timber.i("Geofence triggered at $triggeredLocation with transition $transition: $triggeringGeofencesIdsString")
     }
 
-    /**
-     * Posts a notification in the notification bar when a transition is detected.
-     * If the user clicks the notification, control goes to the MainActivity.
-     */
-    private fun sendNotification() {
-        // Create an explicit content Intent that starts the main Activity.
+    // Picasso holds Target instance with weak reference.
+    // So it is better to hold Target as instance field.
+    // see: http://stackoverflow.com/a/29274669/5183999
+    private var notificationTarget: Target? = null
+
+    private fun sendNotification(story: Story) {
         val notificationIntent = Intent(applicationContext, MainActivity::class.java)
 
-        // Construct a task stack.
         val stackBuilder = TaskStackBuilder.create(this)
 
-        // Add the main Activity to the task stack as the parent.
         stackBuilder.addParentStack(MainActivity::class.java)
 
-        // Push the content Intent onto the stack.
         stackBuilder.addNextIntent(notificationIntent)
 
-        // Get a PendingIntent containing the entire back stack.
         val notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        // Get a notification builder that's compatible with platform versions >= 4
         val builder = NotificationCompat.Builder(this)
 
-        // Define the notification settings.
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(getString(R.string.geofence_notification_text))
-                .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_MIN
+                .setContentText(story.text)
+                .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_LOW
 
-        // Get an instance of the Notification manager
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Issue the notification
-        notificationManager.notify(0, builder.build())
+        notificationTarget = object : Target {
+            override fun onBitmapFailed(errorDrawable: Drawable?) {
+                notificationManager.notify(0, builder.build())
+            }
+
+            override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                if (bitmap != null) {
+                    builder.setLargeIcon(bitmap)
+
+                    notificationManager.notify(0, builder.build())
+                } else {
+                    Timber.d("Notification loaded bitmap is null")
+                }
+            }
+
+            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+            }
+
+        }
+
+        Handler(mainLooper).post({
+            Picasso.with(this)
+                    .load(story.url)
+                    .into(notificationTarget)
+        })
     }
 
 
