@@ -8,9 +8,7 @@ import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import com.bluelinelabs.conductor.Controller
-import com.google.android.gms.maps.GoogleMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_story.view.*
 import lt.gyvosistorijos.entity.Story
@@ -27,7 +25,6 @@ class StoryController(args: Bundle) : Controller(args) {
     private val story = Story.fromBundle(args)
     private val storyAnimator: StoryAnimator = StoryAnimator()
 
-    private lateinit var map: GoogleMap
     private var animatingOut = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -38,8 +35,7 @@ class StoryController(args: Bundle) : Controller(args) {
     override fun onAttach(view: View) {
         AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
-        map = (activity as MainActivity).map
-        map.isMyLocationEnabled = false
+        (activity as MainActivity).map.isMyLocationEnabled = false
 
         view.hideStoryButton.setOnClickListener { clickHideButton() }
         bindStory(story)
