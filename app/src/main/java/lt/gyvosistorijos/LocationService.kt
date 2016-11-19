@@ -26,14 +26,14 @@ internal class LocationService(activity: FragmentActivity) : LocationListener,
     private var isStartPending = false
 
     init {
-        this.context = activity
-        this.googleApiClient = GoogleApiClient.Builder(activity)
+        context = activity
+        googleApiClient = GoogleApiClient.Builder(activity)
                 .enableAutoManage(activity, 1, this)
                 .addConnectionCallbacks(this)
                 .addApi(LocationServices.API)
                 .build()
 
-        this.listeners = ArrayList<LocationListener>()
+        listeners = ArrayList<LocationListener>()
     }
 
     override fun onConnected(connectionHint: Bundle?) {
@@ -83,7 +83,10 @@ internal class LocationService(activity: FragmentActivity) : LocationListener,
     }
 
     fun stop() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+        isStartPending = false
+        if (googleApiClient.isConnected) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+        }
     }
 
     override fun onLocationChanged(location: Location) {

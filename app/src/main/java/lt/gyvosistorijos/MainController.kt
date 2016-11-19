@@ -100,6 +100,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         locationService = (activity as MainActivity).locationService
         onLocationChanged(locationService.lastLocation)
         locationService.addLocationListener(this)
+        locationService.start()
 
         map.isMyLocationEnabled = true
 
@@ -188,6 +189,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
             map.setOnMarkerClickListener(null)
         }
         locationService.removeLocationListener(this)
+        locationService.stop()
     }
 
     private fun getAlpha(markerPosition: LatLng, location: Location): Float {

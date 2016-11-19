@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        locationService.start()
     }
 
     override fun onResume() {
@@ -88,7 +87,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        locationService.stop()
         mapView.onStop()
         super.onStop()
     }
