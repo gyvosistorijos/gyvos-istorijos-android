@@ -23,8 +23,8 @@ android {
         applicationId "lt.gyvosistorijos"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 4
-        versionName "0.3"
+        versionCode 5
+        versionName "0.3.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"" + MAPBOX_ACCESS_TOKEN + "\"")
