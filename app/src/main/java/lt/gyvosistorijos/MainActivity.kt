@@ -1,14 +1,18 @@
 package lt.gyvosistorijos
 
+import android.content.res.Resources
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.MapStyleOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import lt.gyvosistorijos.location.GeofenceHelper
 import lt.gyvosistorijos.manager.RemoteConfigManager
+import timber.log.Timber
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,11 +47,25 @@ class MainActivity : AppCompatActivity() {
 
             map.uiSettings.isMyLocationButtonEnabled = false
 
+            initMapStyle()
+
             val router = Conductor.attachRouter(this, controller_container, savedInstanceState)
             if (!router.hasRootController()) {
                 router.setRoot(RouterTransaction.with(SyncController()))
             }
             this.router = router
+        }
+    }
+
+    private fun initMapStyle() {
+        try {
+            val success = map.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style))
+            if (!success) {
+                Timber.e("Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Timber.e("MapsActivityRaw", "Can't find style.", e)
         }
     }
 
