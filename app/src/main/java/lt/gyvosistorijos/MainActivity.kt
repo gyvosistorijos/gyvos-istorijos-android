@@ -13,6 +13,9 @@ import lt.gyvosistorijos.manager.RemoteConfigManager
 class MainActivity : AppCompatActivity() {
 
     internal lateinit var router: Router
+    companion object {
+        val MAP_SAVED_STATE_KEY = "map"
+    }
 
 
     internal lateinit var geofenceHelper: GeofenceHelper
@@ -27,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         router = Conductor.attachRouter(this, controller_container, savedInstanceState)
         locationService = LocationService(this)
 
-        mapView.onCreate(savedInstanceState)
+        mapView.onCreate(savedInstanceState?.getBundle(MAP_SAVED_STATE_KEY))
 
         RemoteConfigManager.instance.fetchConfig()
 
@@ -73,8 +76,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        val mapState = Bundle()
+        mapView.onSaveInstanceState(mapState)
+        outState.putBundle(MAP_SAVED_STATE_KEY, mapState)
         super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
