@@ -60,19 +60,12 @@ class SyncController : Controller() {
         Timber.d("Got ${stories.size} stories from API")
         StoryDb.insert(stories)
 
-        setGeofencingStories(stories)
         loadPermissionController()
     }
 
     private fun loadPermissionController() {
         if (isAttached)
             router.replaceTopController(RouterTransaction.with(PermissionsController()))
-    }
-
-    private fun setGeofencingStories(stories: List<Story>) {
-        val geofenceRegions = stories.map { s -> Story.toGeofenceRegion(s) }
-
-        (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
 
     private fun onFailure() {

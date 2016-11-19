@@ -27,6 +27,10 @@ class MainActivity : AppCompatActivity() {
 
         mapView.onCreate(savedInstanceState)
 
+        RemoteConfigManager.instance.fetchConfig()
+
+        geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
+
         mapView.getMapAsync { mapboxMap ->
             map = mapboxMap
 
@@ -37,10 +41,6 @@ class MainActivity : AppCompatActivity() {
                 router.setRoot(RouterTransaction.with(SyncController()))
             }
         }
-
-        RemoteConfigManager.instance.fetchConfig()
-
-        geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
     }
 
     override fun onBackPressed() {
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
-    
+
     override fun onResume() {
         super.onResume()
         mapView.onResume()

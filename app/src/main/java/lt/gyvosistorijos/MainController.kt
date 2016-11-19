@@ -96,6 +96,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
         onLocationChanged(locationServices.lastLocation)
         locationServices.addLocationListener(this)
         map.isMyLocationEnabled = true
+
+        setGeofencingStories(stories)
     }
 
     override fun onLocationChanged(location: Location?) {
@@ -190,5 +192,11 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
         return Math.max(0.5,
                 1 - markerPosition.distanceTo(
                         LatLng(location.latitude, location.longitude)) / 1000).toFloat()
+    }
+
+    private fun setGeofencingStories(stories: List<Story>) {
+        val geofenceRegions = stories.map { s -> Story.toGeofenceRegion(s) }
+
+        (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
 }
