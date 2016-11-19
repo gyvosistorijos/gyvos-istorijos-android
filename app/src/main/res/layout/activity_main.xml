@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.mapbox.mapboxsdk.maps.MapView
+    <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        mapbox:attribution_enabled="false"
-        mapbox:center_latitude="54.6872"
-        mapbox:center_longitude="25.2797"
-        mapbox:logo_enabled="false"
-        mapbox:style_url="@string/MAPBOX_MAP_STYLE_URL"
-        mapbox:zoom="11"
+        map:cameraTargetLat="54.6872"
+        map:cameraTargetLng="25.2797"
+        map:cameraZoom="11"
+        map:uiTiltGestures="false"
+        map:uiRotateGestures="false"
         tools:visibility="gone" />
 
     <View

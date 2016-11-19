@@ -85,8 +85,8 @@ dependencies {
     compile 'com.bluelinelabs:conductor:2.0.4'
     compile 'com.jakewharton.timber:timber:4.3.1'
 
-
     compile "com.google.android.gms:play-services-location:$playServicesVersion"
+    compile "com.google.android.gms:play-services-maps:$playServicesVersion"
 
     compile "com.google.firebase:firebase-core:$playServicesVersion"
     compile "com.google.firebase:firebase-messaging:$playServicesVersion"

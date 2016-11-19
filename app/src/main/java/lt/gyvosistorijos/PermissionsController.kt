@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
-import com.mapbox.mapboxsdk.location.LocationServices
 import kotlinx.android.synthetic.main.controller_permissions.view.*
 import lt.gyvosistorijos.utils.AppEvent
 
@@ -18,8 +17,6 @@ class PermissionsController : Controller() {
         val SCREEN_NAME = "Permissions"
     }
 
-    internal lateinit var locationServices: LocationServices
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_permissions, container, false)
         return view
@@ -28,10 +25,10 @@ class PermissionsController : Controller() {
     override fun onAttach(view: View) {
         AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
-        locationServices = LocationServices.getLocationServices(applicationContext!!)
+        val locationService = (activity as MainActivity).locationService
 
         // Check if user has granted location permission
-        if (!locationServices.areLocationPermissionsGranted()) {
+        if (!locationService.areLocationPermissionsGranted()) {
             requestLocation()
         } else {
             router.replaceTopController(RouterTransaction.with(MainController()))
@@ -51,7 +48,7 @@ class PermissionsController : Controller() {
                                             grantResults: IntArray) {
         when (requestCode) {
             REQUEST_PERMISSIONS_LOCATION -> {
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     router.replaceTopController(RouterTransaction.with(MainController()))
                 }
             }

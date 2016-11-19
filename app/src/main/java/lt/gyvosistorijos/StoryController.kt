@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.bluelinelabs.conductor.Controller
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.google.android.gms.maps.GoogleMap
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_story.view.*
 import lt.gyvosistorijos.entity.Story
@@ -27,7 +27,7 @@ class StoryController(args: Bundle) : Controller(args) {
     private val story = Story.fromBundle(args)
     private val storyAnimator: StoryAnimator = StoryAnimator()
 
-    private lateinit var map: MapboxMap
+    private lateinit var map: GoogleMap
     private var animatingOut = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
