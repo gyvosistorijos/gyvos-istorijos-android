@@ -65,13 +65,15 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                 triggeringGeofencesIdsList
         )
 
-        val triggeredStory = getTriggeredStory(triggeringGeofencesIdsList)
 
-        sendNotification(triggeredStory)
-    }
+        val triggeredStory = StoryDb.getById(triggeringGeofencesIdsList.first())
 
-    private fun getTriggeredStory(storyIds: List<String>): Story {
-        return StoryDb.getByIds(storyIds).first()
+        if (triggeredStory != null) {
+            sendNotification(triggeredStory)
+        } else {
+            Timber.w("Triggered story is null. " +
+                    "TriggeringGeofencesIdsList = $triggeringGeofencesIdsList}")
+        }
     }
 
     private fun logGeofenceTransitionDetails(

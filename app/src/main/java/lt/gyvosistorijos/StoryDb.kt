@@ -30,13 +30,12 @@ object StoryDb {
         return stories
     }
 
-    fun getByIds(ids: List<String>): List<Story> {
-        val stories = withRealm {
-            val realmStories = where(StoryRealm::class.java).
-                    `in`(StoryRealm::id.name, ids.toTypedArray()).findAll()
-            copyFromRealm(realmStories).map { s -> StoryRealm.toStory(s) }
-        }
+    fun getById(id: String): Story? {
+        return withRealm {
+            val realmStory = where(StoryRealm::class.java)
+                    .equalTo(StoryRealm::id.name, id).findFirst()
 
-        return stories
+            copyFromRealm(realmStory)?.let { s -> StoryRealm.toStory(s) }
+        }
     }
 }
