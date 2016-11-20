@@ -75,9 +75,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         view.showStoryImage.setOnClickListener { clickShowStory() }
 
         map = (activity as MainActivity).map
-        if (BuildConfig.DEBUG) {
-            map.setOnMarkerClickListener(this)
-        }
+        map.setOnMarkerClickListener(this)
 
         val stories = StoryDb.getAll()
         map.clear()
@@ -153,14 +151,24 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         }
     }
 
-    // debug builds only
+    private fun createTempTravelMotivationStory(): Story {
+        return Story(
+                "lt.gyvosistorijos.MainController.createTempTravelMotivationStory",
+                resources!!.getString(R.string.travel_to_story_cta),
+                null,
+                0.0, 0.0,
+                resources!!.getString(R.string.travel_to_story_cta_author))
+    }
+
     override fun onMarkerClick(marker: Marker): Boolean {
-        val story = markerIdToStory[marker.id]
-        if (null != story) {
+        val story = markerIdToStory[marker.id] ?: return false
+        if (story == activeStory || BuildConfig.DEBUG) {
             router.pushController(RouterTransaction.with(StoryController(story)))
-            return true
+        } else {
+            router.pushController(
+                    RouterTransaction.with(StoryController(createTempTravelMotivationStory())))
         }
-        return false
+        return true
     }
 
     private fun showShowStory() {
@@ -189,9 +197,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     }
 
     override fun onDetach(view: View) {
-        if (BuildConfig.DEBUG) {
-            map.setOnMarkerClickListener(null)
-        }
+        map.setOnMarkerClickListener(null)
         locationService.removeLocationListener(this)
         locationService.stop()
     }
