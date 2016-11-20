@@ -14,14 +14,9 @@
         map:cameraTargetLat="54.6872"
         map:cameraTargetLng="25.2797"
         map:cameraZoom="11"
-        map:uiTiltGestures="false"
         map:uiRotateGestures="false"
+        map:uiTiltGestures="false"
         tools:visibility="gone" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/center_gradient" />
 
     <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
         android:id="@+id/controller_container"
