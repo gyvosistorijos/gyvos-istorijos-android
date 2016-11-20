@@ -8,4 +8,8 @@
         <key>geofence_radius_m</key>
         <value>150</value>
     </entry>
+    <entry>
+        <key>story_radius_m</key>
+        <value>150</value>
+    </entry>
 </defaultsMap>

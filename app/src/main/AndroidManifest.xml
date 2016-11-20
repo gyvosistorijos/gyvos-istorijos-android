@@ -41,7 +41,10 @@
 
         <service android:name=".service.GeofenceIntentService" />
 
-        <service android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
     </application>
 
 </manifest>

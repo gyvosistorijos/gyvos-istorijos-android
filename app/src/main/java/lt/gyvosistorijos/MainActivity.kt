@@ -1,52 +1,80 @@
 package lt.gyvosistorijos
 
+import android.content.res.Resources
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.MapStyleOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import lt.gyvosistorijos.location.GeofenceHelper
+import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
+import timber.log.Timber
+
 
 class MainActivity : AppCompatActivity() {
 
-    internal lateinit var router: Router
+    companion object {
+        val MAP_SAVED_STATE_KEY = "map"
+    }
 
-    internal lateinit var map: MapboxMap
+    internal var router: Router? = null
+
+    internal lateinit var map: GoogleMap
 
     internal lateinit var geofenceHelper: GeofenceHelper
-
+    internal lateinit var locationService: LocationService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        router = Conductor.attachRouter(this, controller_container, savedInstanceState)
-
-        mapView.onCreate(savedInstanceState)
-
         RemoteConfigManager.instance.fetchConfig()
-
         geofenceHelper = GeofenceHelper(this, RemoteConfigManager.instance)
+        locationService = LocationService(this)
 
-        mapView.getMapAsync { mapboxMap ->
-            map = mapboxMap
+        mapView.onCreate(savedInstanceState?.getBundle(MAP_SAVED_STATE_KEY))
 
-            map.uiSettings.isTiltGesturesEnabled = false
-            map.uiSettings.isRotateGesturesEnabled = false
+        mapView.getMapAsync { googleMap ->
+            map = googleMap
 
+            map.uiSettings.isMyLocationButtonEnabled = false
+
+            initMapStyle()
+
+            val router = Conductor.attachRouter(this, controller_container, savedInstanceState)
             if (!router.hasRootController()) {
                 router.setRoot(RouterTransaction.with(SyncController()))
             }
+            this.router = router
+        }
+    }
+
+    private fun initMapStyle() {
+        try {
+            val success = map.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style))
+            if (!success) {
+                Timber.e("Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Timber.e(e, "Can't find style.")
         }
     }
 
     override fun onBackPressed() {
-        if (!router.handleBack()) {
+        val handled = router?.handleBack() ?: false
+        if (!handled) {
             super.onBackPressed()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
@@ -55,23 +83,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        super.onPause()
         mapView.onPause()
+        super.onPause()
     }
 
+    override fun onStop() {
+        mapView.onStop()
+        super.onStop()
+    }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        val mapState = Bundle()
+        mapView.onSaveInstanceState(mapState)
+        outState.putBundle(MAP_SAVED_STATE_KEY, mapState)
         super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         mapView.onDestroy()
+        super.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
     }
+
 }

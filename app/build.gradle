@@ -26,9 +26,6 @@ android {
         versionCode 5
         versionName "0.3.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"" + MAPBOX_ACCESS_TOKEN + "\"")
-        resValue("string", "MAPBOX_MAP_STYLE_URL", "\"" + MAPBOX_MAP_STYLE_URL + "\"")
     }
 
     signingConfigs {
@@ -72,10 +69,6 @@ dependencies {
     compile "com.android.support:support-annotations:$supportVersion"
     testCompile 'junit:junit:4.12'
 
-    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:4.1.1@aar') {
-        transitive = true
-    }
-
     compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
     compile "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
     compile 'com.squareup.moshi:moshi:1.3.1'
@@ -85,8 +78,8 @@ dependencies {
     compile 'com.bluelinelabs:conductor:2.0.4'
     compile 'com.jakewharton.timber:timber:4.3.1'
 
-
     compile "com.google.android.gms:play-services-location:$playServicesVersion"
+    compile "com.google.android.gms:play-services-maps:$playServicesVersion"
 
     compile "com.google.firebase:firebase-core:$playServicesVersion"
     compile "com.google.firebase:firebase-messaging:$playServicesVersion"

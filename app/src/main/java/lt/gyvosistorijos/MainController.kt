@@ -1,44 +1,49 @@
 package lt.gyvosistorijos
 
 import android.animation.ValueAnimator
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.location.Location
-import android.support.v4.util.LongSparseArray
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
-import com.mapbox.mapboxsdk.annotations.IconFactory
-import com.mapbox.mapboxsdk.annotations.Marker
-import com.mapbox.mapboxsdk.annotations.MarkerView
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.LocationListener
-import com.mapbox.mapboxsdk.location.LocationServices
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.google.android.gms.location.LocationListener
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.controller_main.view.*
 import lt.gyvosistorijos.entity.Story
+import lt.gyvosistorijos.location.LocationService
+import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
 import java.util.*
 
-class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, LocationListener {
+
+class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
 
     companion object {
         val SCREEN_NAME = "Main"
     }
 
     internal lateinit var showStoryAnimator: ValueAnimator
-    internal lateinit var map: MapboxMap
-    internal lateinit var locationServices: LocationServices
+    internal lateinit var map: GoogleMap
+    internal lateinit var locationService: LocationService
 
     internal var zoomedIn: Boolean = false
     internal var activeStory: Story? = null
 
-    internal val storyMarkers: MutableList<MarkerView> = ArrayList()
-    internal val markerIdToStory = LongSparseArray<Story>()
+    internal val storyMarkers: MutableList<Marker> = ArrayList()
+    internal val markerIdToStory = HashMap<String, Story>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_main, container, false)
@@ -71,17 +76,19 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
         map = (activity as MainActivity).map
         if (BuildConfig.DEBUG) {
-            map.markerViewManager.setOnMarkerViewClickListener(this)
+            map.setOnMarkerClickListener(this)
         }
 
         val stories = StoryDb.getAll()
         map.clear()
         storyMarkers.clear()
         markerIdToStory.clear()
+
+        val drawable = ContextCompat.getDrawable(activity, R.drawable.dot)
+        val icon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(drawable))
         for (story in stories) {
-            val marker = map.addMarker(MarkerViewOptions()
-                    .icon(IconFactory.getInstance(activity!!)
-                            .fromResource(R.drawable.dot))
+            val marker = map.addMarker(MarkerOptions()
+                    .icon(icon)
                     .flat(true)
                     .position(LatLng(story.latitude, story.longitude)))
 
@@ -92,9 +99,11 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
             storyMarkers.add(marker)
         }
 
-        locationServices = LocationServices.getLocationServices(applicationContext!!)
-        onLocationChanged(locationServices.lastLocation)
-        locationServices.addLocationListener(this)
+        locationService = (activity as MainActivity).locationService
+        onLocationChanged(locationService.lastLocation)
+        locationService.addLocationListener(this)
+        locationService.start()
+
         map.isMyLocationEnabled = true
 
         setGeofencingStories(stories)
@@ -107,31 +116,30 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
         if (!zoomedIn) {
             // Move the map camera to where the user location is
-            map.cameraPosition = CameraPosition.Builder()
-                    .target(LatLng(location)).zoom(16.0)
-                    .build()
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    LatLng(location.latitude, location.longitude), 16.0f))
             zoomedIn = true
         }
 
+        val maxDistanceMeters = RemoteConfigManager.instance.getStoryRadiusInMeters()
+
         for (marker in storyMarkers) {
-            marker.alpha = getAlpha(marker.position, location)
+            marker.alpha = getAlpha(marker.position, location, maxDistanceMeters)
         }
 
         // find 'active' story, if one exists
         val prevActiveStory = activeStory
-        var closestDistanceMeters = java.lang.Double.MAX_VALUE
+        var closestDistanceMeters = Float.MAX_VALUE
         val userLocation = LatLng(location.latitude, location.longitude)
-        for (i in 0..markerIdToStory.size() - 1) {
-            val story = markerIdToStory.valueAt(i)
-
+        for ((id, story) in markerIdToStory) {
             val distanceMeters =
-                    userLocation.distanceTo(LatLng(story.latitude, story.longitude))
+                    userLocation.distanceMetersTo(LatLng(story.latitude, story.longitude))
             if (distanceMeters < closestDistanceMeters) {
                 activeStory = story
                 closestDistanceMeters = distanceMeters
             }
         }
-        if (null != activeStory && closestDistanceMeters > 1000) {
+        if (closestDistanceMeters > maxDistanceMeters) {
             activeStory = null
         }
 
@@ -146,9 +154,8 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
     }
 
     // debug builds only
-    override fun onMarkerClick(marker: Marker, view: View,
-                               adapter: MapboxMap.MarkerViewAdapter<*>): Boolean {
-        val story = markerIdToStory.get(marker.id)
+    override fun onMarkerClick(marker: Marker): Boolean {
+        val story = markerIdToStory[marker.id]
         if (null != story) {
             router.pushController(RouterTransaction.with(StoryController(story)))
             return true
@@ -183,15 +190,17 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
     override fun onDetach(view: View) {
         if (BuildConfig.DEBUG) {
-            map.markerViewManager.setOnMarkerViewClickListener(null)
+            map.setOnMarkerClickListener(null)
         }
-        locationServices.removeLocationListener(this)
+        locationService.removeLocationListener(this)
+        locationService.stop()
     }
 
-    private fun getAlpha(markerPosition: LatLng, location: Location): Float {
-        return Math.max(0.5,
-                1 - markerPosition.distanceTo(
-                        LatLng(location.latitude, location.longitude)) / 1000).toFloat()
+    private fun getAlpha(markerPosition: LatLng, location: Location,
+                         maxDistanceMeters: Float): Float {
+        return Math.max(0.5f,
+                1 - markerPosition.distanceMetersTo(
+                        LatLng(location.latitude, location.longitude)) / (2 * maxDistanceMeters))
     }
 
     private fun setGeofencingStories(stories: List<Story>) {
@@ -199,4 +208,32 @@ class MainController : Controller(), MapboxMap.OnMarkerViewClickListener, Locati
 
         (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
+}
+
+private fun LatLng.distanceMetersTo(other: LatLng): Float {
+    val distance = FloatArray(1)
+    Location.distanceBetween(latitude, longitude, other.latitude, other.longitude, distance)
+    return distance[0]
+}
+
+private fun drawableToBitmap(drawable: Drawable): Bitmap {
+    if (drawable is BitmapDrawable) {
+        if (drawable.bitmap != null) {
+            return drawable.bitmap
+        }
+    }
+
+    val bitmap: Bitmap
+    if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+        bitmap = Bitmap.createBitmap(1, 1,
+                Bitmap.Config.ARGB_8888) // Single color bitmap will be created of 1x1 pixel
+    } else {
+        bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888)
+    }
+
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+    drawable.draw(canvas)
+    return bitmap
 }
