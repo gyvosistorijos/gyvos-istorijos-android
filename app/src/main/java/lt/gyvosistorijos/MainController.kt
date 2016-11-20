@@ -90,9 +90,6 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
                     .flat(true)
                     .position(LatLng(story.latitude, story.longitude)))
 
-            // call after #addMarker due to Mapbox SDK bug
-            marker.alpha = 0f
-
             markerIdToStory.put(marker.id, story)
             storyMarkers.add(marker)
         }
