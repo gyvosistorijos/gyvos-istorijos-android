@@ -27,7 +27,6 @@ import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
 import timber.log.Timber
-import java.util.*
 
 
 class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
@@ -47,7 +46,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     internal var zoomedIn: Boolean = false
     internal var activeStory: Story? = null
 
-    internal var storyMarkers: List<Marker> = ArrayList()
+    internal var storyMarkers = listOf<Marker>()
+    internal var userLocation: LatLng? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_main, container, false)
@@ -125,10 +125,10 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         // find 'active' story, if one exists
         val prevActiveStory = activeStory
 
-        val userLocation = LatLng(location.latitude, location.longitude)
+        userLocation = LatLng(location.latitude, location.longitude)
 
         val closestMarker = storyMarkers.minBy { m ->
-            userLocation.distanceMetersTo(m.position)
+            userLocation!!.distanceMetersTo(m.position)
         }
 
         if (closestMarker == null) {
@@ -137,7 +137,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
             return
         }
 
-        val closestDistanceMeters = userLocation.distanceMetersTo(closestMarker.position)
+        val closestDistanceMeters = userLocation!!.distanceMetersTo(closestMarker.position)
 
         if (closestDistanceMeters > MAX_DISTANCE_METERS) {
             activeStory = null
@@ -165,7 +165,11 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     override fun onMarkerClick(marker: Marker): Boolean {
         val story = marker.tag as Story
 
-        if (story == activeStory || BuildConfig.DEBUG) {
+        val distanceToStory = userLocation?.distanceMetersTo(
+                LatLng(story.latitude, story.longitude))
+
+        if ((distanceToStory != null &&
+                distanceToStory < MAX_DISTANCE_METERS) || BuildConfig.DEBUG) {
             router.pushController(RouterTransaction.with(StoryController(story)))
         } else {
             router.pushController(
