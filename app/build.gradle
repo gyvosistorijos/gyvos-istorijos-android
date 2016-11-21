@@ -9,6 +9,7 @@ buildscript {
 
 plugins {
     id 'com.github.ben-manes.versions' version '0.13.0'
+    id "com.nimbledroid.profiler" version "1.0.9"
 }
 
 apply plugin: 'com.android.application'
@@ -104,6 +105,11 @@ dependencyUpdates.resolutionStrategy = {
             }
         }
     }
+}
+
+nimbledroid {
+    apiKey 'NIMBLEDROID_API_KEY'
+    apkFilename 'app-release-unsigned-bitrise-signed.apk'
 }
 
 apply plugin: 'com.google.gms.google-services'
