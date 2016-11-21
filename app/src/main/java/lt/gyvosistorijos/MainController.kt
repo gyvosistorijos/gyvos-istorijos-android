@@ -141,6 +141,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         if (closestDistanceMeters > MAX_DISTANCE_METERS) {
             activeStory = null
+        } else {
+            activeStory = closestMarker.tag as Story
         }
 
         if (null == prevActiveStory && null != activeStory) {
