@@ -34,6 +34,10 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
     companion object {
         val SCREEN_NAME = "Main"
+
+        val MAX_DISTANCE_METERS by lazy {
+            RemoteConfigManager.instance.getStoryRadiusInMeters()
+        }
     }
 
     internal lateinit var showStoryAnimator: ValueAnimator
@@ -114,10 +118,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
             zoomedIn = true
         }
 
-        val maxDistanceMeters = RemoteConfigManager.instance.getStoryRadiusInMeters()
-
         for (marker in storyMarkers) {
-            marker.alpha = getAlpha(marker.position, location, maxDistanceMeters)
+            marker.alpha = getAlpha(marker.position, location, MAX_DISTANCE_METERS)
         }
 
         // find 'active' story, if one exists
@@ -137,7 +139,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         val closestDistanceMeters = userLocation.distanceMetersTo(closestMarker.position)
 
-        if (closestDistanceMeters > maxDistanceMeters) {
+        if (closestDistanceMeters > MAX_DISTANCE_METERS) {
             activeStory = null
         }
 
