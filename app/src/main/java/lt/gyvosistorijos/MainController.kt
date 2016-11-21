@@ -26,6 +26,7 @@ import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
+import timber.log.Timber
 import java.util.*
 
 
@@ -42,8 +43,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     internal var zoomedIn: Boolean = false
     internal var activeStory: Story? = null
 
-    internal val storyMarkers: MutableList<Marker> = ArrayList()
-    internal val markerIdToStory = HashMap<String, Story>()
+    internal var storyMarkers: List<Marker> = ArrayList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_main, container, false)
@@ -79,19 +79,17 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         val stories = StoryDb.getAll()
         map.clear()
-        storyMarkers.clear()
-        markerIdToStory.clear()
 
         val drawable = ContextCompat.getDrawable(activity, R.drawable.dot)
         val icon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(drawable))
-        for (story in stories) {
+
+        storyMarkers = stories.map { story ->
             val marker = map.addMarker(MarkerOptions()
                     .icon(icon)
-                    .flat(true)
                     .position(LatLng(story.latitude, story.longitude)))
+            marker.tag = story
 
-            markerIdToStory.put(marker.id, story)
-            storyMarkers.add(marker)
+            marker
         }
 
         locationService = (activity as MainActivity).locationService
@@ -124,16 +122,21 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         // find 'active' story, if one exists
         val prevActiveStory = activeStory
-        var closestDistanceMeters = Float.MAX_VALUE
+
         val userLocation = LatLng(location.latitude, location.longitude)
-        for ((id, story) in markerIdToStory) {
-            val distanceMeters =
-                    userLocation.distanceMetersTo(LatLng(story.latitude, story.longitude))
-            if (distanceMeters < closestDistanceMeters) {
-                activeStory = story
-                closestDistanceMeters = distanceMeters
-            }
+
+        val closestMarker = storyMarkers.minBy { m ->
+            userLocation.distanceMetersTo(m.position)
         }
+
+        if (closestMarker == null) {
+            Timber.w("No closest markers found")
+
+            return
+        }
+
+        val closestDistanceMeters = userLocation.distanceMetersTo(closestMarker.position)
+
         if (closestDistanceMeters > maxDistanceMeters) {
             activeStory = null
         }
@@ -158,7 +161,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        val story = markerIdToStory[marker.id] ?: return false
+        val story = marker.tag as Story
+
         if (story == activeStory || BuildConfig.DEBUG) {
             router.pushController(RouterTransaction.with(StoryController(story)))
         } else {
