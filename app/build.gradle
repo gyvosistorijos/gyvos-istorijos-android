@@ -23,8 +23,8 @@ android {
         applicationId "lt.gyvosistorijos"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 8
-        versionName "0.4.2"
+        versionCode 9
+        versionName "0.4.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
