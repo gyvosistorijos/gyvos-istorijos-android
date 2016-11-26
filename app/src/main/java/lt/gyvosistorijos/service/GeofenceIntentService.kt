@@ -66,13 +66,15 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         )
 
 
-        val triggeredStory = StoryDb.getById(triggeringGeofencesIdsList.first())
 
-        if (triggeredStory != null) {
-            sendNotification(triggeredStory)
-        } else {
-            Timber.w("Triggered story is null. " +
-                    "TriggeringGeofencesIdsList = $triggeringGeofencesIdsList}")
+        when (geofenceTransition) {
+            com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER ->
+                StoryDb.getById(triggeringGeofencesIdsList.first())?.let { story ->
+                    sendNotification(story)
+                }
+            com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT ->
+                triggeringGeofencesIdsList.map { StoryDb.getById(it) }
+                        .filterNotNull().forEach { cancelNotification(it) }
         }
     }
 
@@ -110,18 +112,20 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_LOW
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getNotificationManager()
+
+        val notificationId = getStoryNotificationId(story)
 
         notificationTarget = object : Target {
             override fun onBitmapFailed(errorDrawable: Drawable?) {
-                notificationManager.notify(0, builder.build())
+                notificationManager.notify(notificationId, builder.build())
             }
 
             override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
                 if (bitmap != null) {
                     builder.setLargeIcon(bitmap)
 
-                    notificationManager.notify(0, builder.build())
+                    notificationManager.notify(notificationId, builder.build())
                 } else {
                     Timber.d("Notification loaded bitmap is null")
                 }
@@ -137,6 +141,23 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                     .load(story.url)
                     .into(notificationTarget)
         })
+    }
+
+    private fun getNotificationManager(): NotificationManager {
+        return getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+    private fun getStoryNotificationId(story: Story): Int {
+        return Math.abs(story.id.hashCode())
+    }
+
+    private fun cancelNotification(story: Story) {
+        val notificationId = getStoryNotificationId(story)
+
+        Timber.i("Canceling notification with notification id = $notificationId " +
+                "and id = ${story.id}")
+
+        getNotificationManager().cancel(notificationId)
     }
 
 

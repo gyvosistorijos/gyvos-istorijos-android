@@ -87,8 +87,7 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
                                 geofenceRadiusInMeters
                         )
                         .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                        .setLoiteringDelay(geofenceLoiteringDelayMs)
-                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER.or(Geofence.GEOFENCE_TRANSITION_EXIT))
                         .build())
             }
         }
@@ -157,7 +156,10 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
 
     private fun buildGeofencingRequest(): GeofencingRequest {
         val builder = GeofencingRequest.Builder()
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+        builder.setInitialTrigger(
+                GeofencingRequest.INITIAL_TRIGGER_ENTER
+                        .or(GeofencingRequest.INITIAL_TRIGGER_EXIT)
+        )
         builder.addGeofences(geofenceList)
         return builder.build()
     }
