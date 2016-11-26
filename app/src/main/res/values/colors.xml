@@ -10,5 +10,7 @@
     <color name="baseTransparent">#00EBE3CD</color>
 
     <color name="markerForeground">@color/colorAccent</color>
+    <color name="markerVisitedForeground">#0D47A1</color>
+
     <color name="markerBackground">#88B28EB8</color>
 </resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/marker_story_bottom" />
+    <item
+        android:bottom="@dimen/dot_marker_padding"
+        android:drawable="@drawable/marker_story_visited_top"
+        android:left="@dimen/dot_marker_padding"
+        android:right="@dimen/dot_marker_padding"
+        android:top="@dimen/dot_marker_padding" />
+</layer-list>

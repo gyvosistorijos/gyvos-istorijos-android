@@ -6,4 +6,6 @@
     <dimen name="image_height">240dp</dimen>
     <dimen name="attractor_height_offset">8dp</dimen>
     <dimen name="attractor_height_delta">48dp</dimen>
+    <dimen name="dot_marker_padding">4dp</dimen>
+    <dimen name="dot_marker_top_size">12dp</dimen>
 </resources>
