@@ -9,6 +9,7 @@ import android.location.Location
 import android.os.Handler
 import android.support.v7.app.NotificationCompat
 import android.text.TextUtils
+import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -65,11 +66,11 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
 
 
         when (geofenceTransition) {
-            com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER ->
+            Geofence.GEOFENCE_TRANSITION_ENTER ->
                 StoryDb.getById(triggeringGeofencesIdsList.first())?.let { story ->
                     sendNotification(story)
                 }
-            com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT ->
+            Geofence.GEOFENCE_TRANSITION_EXIT ->
                 triggeringGeofencesIdsList.map { StoryDb.getById(it) }
                         .filterNotNull().forEach { cancelNotification(it) }
         }
