@@ -1,9 +1,6 @@
 package lt.gyvosistorijos.service
 
-import android.app.IntentService
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.TaskStackBuilder
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -112,20 +109,17 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_LOW
 
-        val notificationManager = getNotificationManager()
-
-        val notificationId = getStoryNotificationId(story)
 
         notificationTarget = object : Target {
             override fun onBitmapFailed(errorDrawable: Drawable?) {
-                notificationManager.notify(notificationId, builder.build())
+                showStoryNotification(story, builder.build())
             }
 
             override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
                 if (bitmap != null) {
                     builder.setLargeIcon(bitmap)
 
-                    notificationManager.notify(notificationId, builder.build())
+                    showStoryNotification(story, builder.build())
                 } else {
                     Timber.d("Notification loaded bitmap is null")
                 }
@@ -143,21 +137,28 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         })
     }
 
-    private fun getNotificationManager(): NotificationManager {
-        return getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private fun showStoryNotification(story: Story, notification: Notification) {
+        val notificationId = story.getNotificationId()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
+                as NotificationManager
+
+        notification.defaults = notification.defaults.or(Notification.DEFAULT_VIBRATE)
+
+        notificationManager.notify(notificationId, notification)
     }
 
-    private fun getStoryNotificationId(story: Story): Int {
-        return Math.abs(story.id.hashCode())
+    private fun Story.getNotificationId(): Int {
+        return Math.abs(this.id.hashCode())
     }
 
     private fun cancelNotification(story: Story) {
-        val notificationId = getStoryNotificationId(story)
+        val notificationId = story.getNotificationId()
 
         Timber.i("Canceling notification with notification id = $notificationId " +
                 "and id = ${story.id}")
 
-        getNotificationManager().cancel(notificationId)
+        (getSystemService(Context.NOTIFICATION_SERVICE)
+                as NotificationManager).cancel(notificationId)
     }
 
 
