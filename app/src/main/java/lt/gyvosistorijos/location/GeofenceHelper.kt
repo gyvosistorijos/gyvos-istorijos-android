@@ -72,12 +72,10 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
             Timber.d("Clearing all regions")
         } else {
             val geofenceRadiusInMeters = remoteConfigManager.getGeofenceRadiusInMeters()
-            val geofenceLoiteringDelayMs = remoteConfigManager.getGeofenceLoiteringDelayInMilliseconds()
 
             for ((id, latitude, longitude) in regions) {
                 Timber.d("Adding region $id latitude $latitude " +
-                        "longitude $longitude radius ${geofenceRadiusInMeters}m " +
-                        "loitering delay ${geofenceLoiteringDelayMs}ms")
+                        "longitude $longitude radius ${geofenceRadiusInMeters}m ")
 
                 geofenceList.add(Geofence.Builder()
                         .setRequestId(id)
