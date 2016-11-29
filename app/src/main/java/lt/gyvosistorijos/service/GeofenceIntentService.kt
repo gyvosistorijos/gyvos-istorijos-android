@@ -19,6 +19,7 @@ import lt.gyvosistorijos.StoryDb
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.GeofenceErrorMessages
 import timber.log.Timber
+import java.util.*
 
 
 /**
@@ -63,13 +64,14 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                 triggeringGeofencesIdsList
         )
 
-
-
         when (geofenceTransition) {
-            Geofence.GEOFENCE_TRANSITION_ENTER ->
+            Geofence.GEOFENCE_TRANSITION_ENTER -> {
+                Collections.shuffle(triggeringGeofencesIdsList)
+
                 StoryDb.getById(triggeringGeofencesIdsList.first())?.let { story ->
                     sendNotification(story)
                 }
+            }
             Geofence.GEOFENCE_TRANSITION_EXIT ->
                 triggeringGeofencesIdsList.forEach { storyId ->
                     cancelNotification(getNotificationId(storyId))
