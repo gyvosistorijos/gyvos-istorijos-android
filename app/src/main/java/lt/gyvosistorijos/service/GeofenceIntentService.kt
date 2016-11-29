@@ -71,8 +71,9 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                     sendNotification(story)
                 }
             Geofence.GEOFENCE_TRANSITION_EXIT ->
-                triggeringGeofencesIdsList.map { StoryDb.getById(it) }
-                        .filterNotNull().forEach { cancelNotification(it) }
+                triggeringGeofencesIdsList.forEach { storyId ->
+                    cancelNotification(getNotificationId(storyId))
+                }
         }
     }
 
@@ -139,7 +140,7 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
     }
 
     private fun showStoryNotification(story: Story, notification: Notification) {
-        val notificationId = story.getNotificationId()
+        val notificationId = getNotificationId(story.id)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
                 as NotificationManager
 
@@ -148,15 +149,13 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         notificationManager.notify(notificationId, notification)
     }
 
-    private fun Story.getNotificationId(): Int {
-        return Math.abs(this.id.hashCode())
+    private fun getNotificationId(storyId: String): Int {
+        return Math.abs(storyId.hashCode())
     }
 
-    private fun cancelNotification(story: Story) {
-        val notificationId = story.getNotificationId()
+    private fun cancelNotification(notificationId: Int) {
 
-        Timber.i("Canceling notification with notification id = $notificationId " +
-                "and id = ${story.id}")
+        Timber.i("Canceling notification with notification id = $notificationId")
 
         (getSystemService(Context.NOTIFICATION_SERVICE)
                 as NotificationManager).cancel(notificationId)
