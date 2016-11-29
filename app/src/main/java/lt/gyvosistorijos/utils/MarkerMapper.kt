@@ -8,8 +8,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import lt.gyvosistorijos.R
-import lt.gyvosistorijos.StoryDb
 import lt.gyvosistorijos.entity.Story
+import lt.gyvosistorijos.storage.StoryDb
 
 fun addTaggedStoryMarkers(context: Context, map: GoogleMap, stories: List<Story>): List<Marker> {
     val storyDrawable = ContextCompat.getDrawable(context, R.drawable.marker_story)

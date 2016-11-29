@@ -16,7 +16,10 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.controller_onboarding_intro.view.*
 import kotlinx.android.synthetic.main.layout_show_story.view.*
-import lt.gyvosistorijos.*
+import lt.gyvosistorijos.MainActivity
+import lt.gyvosistorijos.R
+import lt.gyvosistorijos.ShowStoryPresenter
+import lt.gyvosistorijos.StoryController
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.storage.StoryDb
@@ -85,12 +88,11 @@ class OnboardingMechanicController : Controller(), LocationListener {
         showStoryPresenter.showShowStory(view!!, story)
 
         map.clear()
-        val drawable = ContextCompat.getDrawable(activity, R.drawable.dot)
+        val drawable = ContextCompat.getDrawable(activity, R.drawable.marker_story)
         val icon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(drawable))
         val marker = map.addMarker(MarkerOptions()
                 .icon(icon)
                 .position(LatLng(story.latitude, story.longitude)))
-
 
         val mapPadding = resources!!.getDimensionPixelSize(R.dimen.map_padding)
         val bounds = LatLngBounds.builder().include(marker.position).include(latestLocation).build()
