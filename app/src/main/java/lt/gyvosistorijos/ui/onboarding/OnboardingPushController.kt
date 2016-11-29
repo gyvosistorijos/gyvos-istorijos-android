@@ -44,7 +44,8 @@ class OnboardingPushController : Controller() {
 
         view.onboardingButton.setOnClickListener {
             OnboardingSharedPrefs(applicationContext!!).setOnboardingCompleted()
-            router.setBackstack(listOf(RouterTransaction.with(MainController())), null)
+            router.setBackstack(listOf(
+                    RouterTransaction.with(MainController(animateZoomIn = true))), null)
         }
     }
 }

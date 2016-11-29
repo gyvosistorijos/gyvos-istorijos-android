@@ -1,6 +1,7 @@
 package lt.gyvosistorijos
 
 import android.location.Location
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,15 +20,22 @@ import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.utils.*
 import timber.log.Timber
 
-class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
+class MainController(args: Bundle) : Controller(args), LocationListener,
+        GoogleMap.OnMarkerClickListener {
 
     companion object {
         val SCREEN_NAME = "Main"
+        val KEY_ANIMATE_ZOOM_IN = "animateZoomIn"
 
         val MAX_DISTANCE_METERS by lazy {
             RemoteConfigManager.instance.getStoryRadiusInMeters()
         }
     }
+
+    private val animateZoomIn: Boolean = args.getBoolean(KEY_ANIMATE_ZOOM_IN, false)
+
+    constructor(animateZoomIn: Boolean)
+            : this(Bundle().set { bool(KEY_ANIMATE_ZOOM_IN to animateZoomIn) })
 
     private val showStoryPresenter: ShowStoryPresenter = ShowStoryPresenter()
     internal lateinit var map: GoogleMap
@@ -73,9 +81,14 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         }
 
         if (!zoomedIn) {
-            // Move the map camera to where the user location is
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    LatLng(location.latitude, location.longitude), 16.0f))
+            // move the map camera to where the user location is
+            val update = CameraUpdateFactory.newLatLngZoom(
+                    LatLng(location.latitude, location.longitude), 16.0f)
+            if (animateZoomIn) {
+                map.animateCamera(update)
+            } else {
+                map.moveCamera(update)
+            }
             zoomedIn = true
         }
 

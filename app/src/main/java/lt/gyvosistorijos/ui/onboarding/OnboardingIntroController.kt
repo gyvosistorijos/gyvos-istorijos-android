@@ -33,7 +33,8 @@ class OnboardingIntroController : Controller() {
         // skip onboarding if user has already completed it
         val sharedPrefs = OnboardingSharedPrefs(applicationContext!!)
         if (sharedPrefs.onboardingCompleted()) {
-            router.replaceTopController(RouterTransaction.with(MainController()))
+            router.replaceTopController(
+                    RouterTransaction.with(MainController(animateZoomIn = false)))
             return
         }
 
