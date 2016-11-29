@@ -2,7 +2,6 @@ package lt.gyvosistorijos.entity.realm
 
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.entity.VisitedStory
 import java.util.*
 
@@ -15,11 +14,10 @@ open class VisitedStoryRealm(
 
     companion object {
 
-        fun toVisitedStory(visitedStoryRealm: VisitedStoryRealm, story: Story): VisitedStory {
+        fun toVisitedStory(visitedStoryRealm: VisitedStoryRealm): VisitedStory {
             return VisitedStory(
                     id = visitedStoryRealm.storyId,
-                    date = visitedStoryRealm.date,
-                    story = story
+                    date = visitedStoryRealm.date
             )
         }
 

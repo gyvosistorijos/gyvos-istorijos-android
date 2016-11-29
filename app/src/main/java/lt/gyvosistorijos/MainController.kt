@@ -90,8 +90,10 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         val storyIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyDrawable))
         val storyVisitedIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyVisitedDrawable))
 
+        val visitedStoryIds = StoryDb.getVisitedStories().map { it.id }.toHashSet()
+
         storyMarkers = stories.map { story ->
-            val icon = if (StoryDb.isStoryVisited(story)) storyVisitedIcon else storyIcon
+            val icon = if (visitedStoryIds.contains(story.id)) storyVisitedIcon else storyIcon
             val marker = map.addMarker(MarkerOptions()
                     .icon(icon)
                     .position(LatLng(story.latitude, story.longitude)))

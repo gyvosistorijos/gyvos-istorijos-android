@@ -58,8 +58,7 @@ object StoryDb {
         val visitedStory = VisitedStoryRealm.fromVisitedStory(
                 VisitedStory(
                         id = story.id,
-                        date = Calendar.getInstance().time,
-                        story = story
+                        date = Calendar.getInstance().time
                 ))
 
         withRealm {
@@ -68,6 +67,13 @@ object StoryDb {
             executeTransaction {
                 copyToRealm(visitedStory)
             }
+        }
+    }
+
+    fun getVisitedStories(): List<VisitedStory> {
+        return withRealm {
+            val realmVisitedStories = where(VisitedStoryRealm::class.java).findAll()
+            copyFromRealm(realmVisitedStories).map { VisitedStoryRealm.toVisitedStory(it) }
         }
     }
 }

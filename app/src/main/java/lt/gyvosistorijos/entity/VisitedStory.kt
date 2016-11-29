@@ -4,6 +4,5 @@ import java.util.*
 
 class VisitedStory(
         val id: String,
-        val date: Date,
-        val story: Story
+        val date: Date
 )
