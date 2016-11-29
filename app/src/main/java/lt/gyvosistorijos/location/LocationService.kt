@@ -15,7 +15,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import java.util.*
 
-internal class LocationService(activity: FragmentActivity) : LocationListener,
+class LocationService(activity: FragmentActivity) : LocationListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private val googleApiClient: GoogleApiClient

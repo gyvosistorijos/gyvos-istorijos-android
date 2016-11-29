@@ -19,9 +19,7 @@ import kotlinx.android.synthetic.main.controller_onboarding.view.*
 import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
-import lt.gyvosistorijos.utils.AppEvent
-import lt.gyvosistorijos.utils.addTaggedStoryMarkers
-import lt.gyvosistorijos.utils.drawableToBitmap
+import lt.gyvosistorijos.utils.*
 
 class OnboardingController : Controller(), LocationListener {
 
@@ -61,9 +59,7 @@ class OnboardingController : Controller(), LocationListener {
         addTaggedStoryMarkers(view.context, map, stories)
 
         locationService = (activity as MainActivity).locationService
-        onLocationChanged(locationService.lastLocation)
-        locationService.addLocationListener(this)
-        locationService.start()
+        locationService.attach(this)
 
         setup(view)
     }
@@ -107,8 +103,7 @@ class OnboardingController : Controller(), LocationListener {
     }
 
     override fun onDetach(view: View) {
-        locationService.removeLocationListener(this)
-        locationService.stop()
+        locationService.detach(this)
         showStoryPresenter.deinit()
     }
 
