@@ -72,12 +72,10 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
             Timber.d("Clearing all regions")
         } else {
             val geofenceRadiusInMeters = remoteConfigManager.getGeofenceRadiusInMeters()
-            val geofenceLoiteringDelayMs = remoteConfigManager.getGeofenceLoiteringDelayInMilliseconds()
 
             for ((id, latitude, longitude) in regions) {
                 Timber.d("Adding region $id latitude $latitude " +
-                        "longitude $longitude radius ${geofenceRadiusInMeters}m " +
-                        "loitering delay ${geofenceLoiteringDelayMs}ms")
+                        "longitude $longitude radius ${geofenceRadiusInMeters}m ")
 
                 geofenceList.add(Geofence.Builder()
                         .setRequestId(id)
@@ -87,8 +85,7 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
                                 geofenceRadiusInMeters
                         )
                         .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                        .setLoiteringDelay(geofenceLoiteringDelayMs)
-                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER.or(Geofence.GEOFENCE_TRANSITION_EXIT))
                         .build())
             }
         }
@@ -157,7 +154,10 @@ class GeofenceHelper(private val fragmentActivity: FragmentActivity,
 
     private fun buildGeofencingRequest(): GeofencingRequest {
         val builder = GeofencingRequest.Builder()
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+        builder.setInitialTrigger(
+                GeofencingRequest.INITIAL_TRIGGER_ENTER
+                        .or(GeofencingRequest.INITIAL_TRIGGER_EXIT)
+        )
         builder.addGeofences(geofenceList)
         return builder.build()
     }

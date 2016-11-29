@@ -1,9 +1,6 @@
 package lt.gyvosistorijos.service
 
-import android.app.IntentService
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.TaskStackBuilder
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -12,6 +9,7 @@ import android.location.Location
 import android.os.Handler
 import android.support.v7.app.NotificationCompat
 import android.text.TextUtils
+import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -21,6 +19,7 @@ import lt.gyvosistorijos.StoryDb
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.GeofenceErrorMessages
 import timber.log.Timber
+import java.util.*
 
 
 /**
@@ -65,14 +64,18 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                 triggeringGeofencesIdsList
         )
 
+        when (geofenceTransition) {
+            Geofence.GEOFENCE_TRANSITION_ENTER -> {
+                Collections.shuffle(triggeringGeofencesIdsList)
 
-        val triggeredStory = StoryDb.getById(triggeringGeofencesIdsList.first())
-
-        if (triggeredStory != null) {
-            sendNotification(triggeredStory)
-        } else {
-            Timber.w("Triggered story is null. " +
-                    "TriggeringGeofencesIdsList = $triggeringGeofencesIdsList}")
+                StoryDb.getById(triggeringGeofencesIdsList.first())?.let { story ->
+                    sendNotification(story)
+                }
+            }
+            Geofence.GEOFENCE_TRANSITION_EXIT ->
+                triggeringGeofencesIdsList.forEach { storyId ->
+                    cancelNotification(getNotificationId(storyId))
+                }
         }
     }
 
@@ -107,21 +110,21 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         builder.setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(getString(R.string.geofence_notification_text))
                 .setContentText(story.text)
+                .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_LOW
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         notificationTarget = object : Target {
             override fun onBitmapFailed(errorDrawable: Drawable?) {
-                notificationManager.notify(0, builder.build())
+                showStoryNotification(story, builder.build())
             }
 
             override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
                 if (bitmap != null) {
                     builder.setLargeIcon(bitmap)
 
-                    notificationManager.notify(0, builder.build())
+                    showStoryNotification(story, builder.build())
                 } else {
                     Timber.d("Notification loaded bitmap is null")
                 }
@@ -137,6 +140,28 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
                     .load(story.url)
                     .into(notificationTarget)
         })
+    }
+
+    private fun showStoryNotification(story: Story, notification: Notification) {
+        val notificationId = getNotificationId(story.id)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
+                as NotificationManager
+
+        notification.defaults = notification.defaults.or(Notification.DEFAULT_VIBRATE)
+
+        notificationManager.notify(notificationId, notification)
+    }
+
+    private fun getNotificationId(storyId: String): Int {
+        return Math.abs(storyId.hashCode())
+    }
+
+    private fun cancelNotification(notificationId: Int) {
+
+        Timber.i("Canceling notification with notification id = $notificationId")
+
+        (getSystemService(Context.NOTIFICATION_SERVICE)
+                as NotificationManager).cancel(notificationId)
     }
 
 
