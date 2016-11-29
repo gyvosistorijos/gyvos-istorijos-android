@@ -58,8 +58,6 @@ class OnboardingMechanicController : Controller(), LocationListener {
         locationService = (activity as MainActivity).locationService
         locationService.attach(this)
 
-        view.onboardingText.setText(R.string.onboarding_mechanic_text)
-        view.onboardingButton.visibility = View.INVISIBLE
         if (null != nearestStory) {
             showShowStory(nearestStory!!)
         }
