@@ -1,41 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#4000">
+    android:background="#6FFF">
 
     <TextView
-        android:id="@+id/syncRetryButton"
+        android:id="@+id/onboardingButton"
         style="@style/OutlineButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="64dp"
-        android:text="@string/sync_retry_cta"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:visibility="invisible" />
 
     <TextView
-        android:id="@+id/syncPrompt"
+        android:id="@+id/onboardingText"
         style="@style/TextAppearance.AppCompat.Subhead"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/syncRetryButton"
+        android:layout_above="@id/onboardingButton"
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="64dp"
         android:layout_marginRight="64dp"
         android:gravity="center"
-        android:text="@string/sync_retry_rationale"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:text="@string/onboarding_mechanic_text"
+        android:textColor="@color/colorAccent" />
 
-    <android.support.v4.widget.ContentLoadingProgressBar
-        android:id="@+id/syncProgress"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+    <FrameLayout
+        android:id="@+id/onboardingShowStory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/layout_show_story" />
+
+    </FrameLayout>
 
 </RelativeLayout>

@@ -1,4 +1,4 @@
-package lt.gyvosistorijos
+package lt.gyvosistorijos.storage
 
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -6,9 +6,9 @@ import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.entity.VisitedStory
 import lt.gyvosistorijos.entity.realm.StoryRealm
 import lt.gyvosistorijos.entity.realm.VisitedStoryRealm
+import lt.gyvosistorijos.utils.distanceMeters
 import timber.log.Timber
 import java.util.*
-
 
 object StoryDb {
 
@@ -83,5 +83,11 @@ object StoryDb {
             val realmVisitedStories = where(VisitedStoryRealm::class.java).findAll()
             copyFromRealm(realmVisitedStories).map { VisitedStoryRealm.toVisitedStory(it) }
         }
+    }
+
+    fun getNearest(lat: Double, lng: Double): Story? {
+        return getAll()
+                .sortedBy { distanceMeters(lat, lng, it.latitude, it.longitude) }
+                .firstOrNull()
     }
 }

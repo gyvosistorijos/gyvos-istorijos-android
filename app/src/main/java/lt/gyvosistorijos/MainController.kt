@@ -1,45 +1,43 @@
 package lt.gyvosistorijos
 
-import android.animation.ValueAnimator
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.location.Location
-import android.support.v4.content.ContextCompat
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.gms.location.LocationListener
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.controller_main.view.*
+import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
-import lt.gyvosistorijos.utils.AppEvent
+import lt.gyvosistorijos.storage.StoryDb
+import lt.gyvosistorijos.utils.*
 import timber.log.Timber
 
-
-class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
+class MainController(args: Bundle) : Controller(args), LocationListener,
+        GoogleMap.OnMarkerClickListener {
 
     companion object {
         val SCREEN_NAME = "Main"
+        val KEY_ANIMATE_ZOOM_IN = "animateZoomIn"
 
         val MAX_DISTANCE_METERS by lazy {
             RemoteConfigManager.instance.getStoryRadiusInMeters()
         }
     }
 
-    internal lateinit var showStoryAnimator: ValueAnimator
+    private val animateZoomIn: Boolean = args.getBoolean(KEY_ANIMATE_ZOOM_IN, false)
+
+    constructor(animateZoomIn: Boolean)
+            : this(Bundle().set { bool(KEY_ANIMATE_ZOOM_IN to animateZoomIn) })
+
+    private val showStoryPresenter: ShowStoryPresenter = ShowStoryPresenter()
     internal lateinit var map: GoogleMap
     internal lateinit var locationService: LocationService
 
@@ -57,23 +55,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     override fun onAttach(view: View) {
         AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
-        val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
-        val attractorHeightOffset =
-                resources!!.getDimensionPixelOffset(R.dimen.attractor_height_offset)
-        val attractorHeightDelta =
-                resources!!.getDimensionPixelOffset(R.dimen.attractor_height_delta)
-
-        showStoryAnimator = ValueAnimator.ofFloat(
-                (imageHeight - attractorHeightOffset - attractorHeightDelta).toFloat(),
-                (imageHeight - attractorHeightOffset).toFloat())
-        showStoryAnimator.repeatCount = ValueAnimator.INFINITE
-        showStoryAnimator.repeatMode = ValueAnimator.REVERSE
-        showStoryAnimator.interpolator = AccelerateDecelerateInterpolator()
-        showStoryAnimator.duration = 1400
-        showStoryAnimator.addUpdateListener { animation ->
-            val value = animation.animatedValue as Float
-            view.showStoryImage.translationY = value
-        }
+        showStoryPresenter.init(view)
 
         view.showStoryButton.setOnClickListener { clickShowStory() }
         view.showStoryImage.setOnClickListener { clickShowStory() }
@@ -83,29 +65,10 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         val stories = StoryDb.getAll()
         map.clear()
-
-        val storyDrawable = ContextCompat.getDrawable(activity, R.drawable.marker_story)
-        val storyVisitedDrawable = ContextCompat.getDrawable(activity, R.drawable.marker_story_visited)
-
-        val storyIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyDrawable))
-        val storyVisitedIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyVisitedDrawable))
-
-        val visitedStoryIds = StoryDb.getVisitedStories().map { it.id }.toHashSet()
-
-        storyMarkers = stories.map { story ->
-            val icon = if (visitedStoryIds.contains(story.id)) storyVisitedIcon else storyIcon
-            val marker = map.addMarker(MarkerOptions()
-                    .icon(icon)
-                    .position(LatLng(story.latitude, story.longitude)))
-            marker.tag = story
-
-            marker
-        }
+        storyMarkers = addTaggedStoryMarkers(view.context, map, stories)
 
         locationService = (activity as MainActivity).locationService
-        onLocationChanged(locationService.lastLocation)
-        locationService.addLocationListener(this)
-        locationService.start()
+        locationService.attach(this)
 
         map.isMyLocationEnabled = true
 
@@ -118,9 +81,15 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         }
 
         if (!zoomedIn) {
-            // Move the map camera to where the user location is
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    LatLng(location.latitude, location.longitude), 16.0f))
+            // move the map camera to where the user location is
+            val update = CameraUpdateFactory.newLatLngZoom(
+                    LatLng(location.latitude, location.longitude),
+                    resources!!.getFloat(R.dimen.narrow_map_zoom))
+            if (animateZoomIn) {
+                map.animateCamera(update)
+            } else {
+                map.moveCamera(update)
+            }
             zoomedIn = true
         }
 
@@ -139,7 +108,6 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         if (closestMarker == null) {
             Timber.w("No closest markers found")
-
             return
         }
 
@@ -152,12 +120,12 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         }
 
         if (null == prevActiveStory && null != activeStory) {
-            showShowStory()
+            showStoryPresenter.showShowStory(view!!, activeStory!!)
         } else if (null != prevActiveStory && null == activeStory) {
-            hideShowStory()
+            showStoryPresenter.hideShowStory(view!!)
         } else if (null != prevActiveStory && null != activeStory
                 && prevActiveStory !== activeStory) {
-            updateShowStoryButton()
+            showStoryPresenter.updateShowStoryButton(view!!, activeStory!!)
         }
     }
 
@@ -173,8 +141,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     override fun onMarkerClick(marker: Marker): Boolean {
         val story = marker.tag as Story
 
-        val distanceToStory = userLocation?.distanceMetersTo(
-                LatLng(story.latitude, story.longitude))
+        val distanceToStory = userLocation?.distanceMetersTo(story.latitude, story.longitude)
 
         if ((distanceToStory != null &&
                 distanceToStory < MAX_DISTANCE_METERS)
@@ -186,26 +153,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         return true
     }
 
-    private fun showShowStory() {
-        showStoryAnimator.start()
-        view!!.showStoryButton.visibility = View.VISIBLE
-        view!!.showStoryImage.visibility = View.VISIBLE
-        updateShowStoryButton()
-    }
-
-    private fun updateShowStoryButton() {
-        Picasso.with(activity)
-                .load(activeStory!!.url).fit().centerCrop().into(view!!.showStoryImage)
-    }
-
-    private fun hideShowStory() {
-        showStoryAnimator.cancel()
-        view!!.showStoryButton.visibility = View.INVISIBLE
-        view!!.showStoryImage.visibility = View.INVISIBLE
-    }
-
     internal fun clickShowStory() {
-        hideShowStory()
+        showStoryPresenter.hideShowStory(view!!)
 
         showStory(activeStory)
     }
@@ -222,15 +171,15 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
     override fun onDetach(view: View) {
         map.setOnMarkerClickListener(null)
-        locationService.removeLocationListener(this)
-        locationService.stop()
+        locationService.detach(this)
+        showStoryPresenter.deinit()
     }
 
     private fun getAlpha(markerPosition: LatLng, location: Location,
                          maxDistanceMeters: Float): Float {
         return Math.max(0.5f,
-                1 - markerPosition.distanceMetersTo(
-                        LatLng(location.latitude, location.longitude)) / (2 * maxDistanceMeters))
+                1 - markerPosition.distanceMetersTo(location.latitude, location.longitude)
+                        / (2 * maxDistanceMeters))
     }
 
     private fun setGeofencingStories(stories: List<Story>) {
@@ -238,32 +187,4 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
-}
-
-private fun LatLng.distanceMetersTo(other: LatLng): Float {
-    val distance = FloatArray(1)
-    Location.distanceBetween(latitude, longitude, other.latitude, other.longitude, distance)
-    return distance[0]
-}
-
-private fun drawableToBitmap(drawable: Drawable): Bitmap {
-    if (drawable is BitmapDrawable) {
-        if (drawable.bitmap != null) {
-            return drawable.bitmap
-        }
-    }
-
-    val bitmap: Bitmap
-    if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-        bitmap = Bitmap.createBitmap(1, 1,
-                Bitmap.Config.ARGB_8888) // Single color bitmap will be created of 1x1 pixel
-    } else {
-        bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888)
-    }
-
-    val canvas = Canvas(bitmap)
-    drawable.setBounds(0, 0, canvas.width, canvas.height)
-    drawable.draw(canvas)
-    return bitmap
 }

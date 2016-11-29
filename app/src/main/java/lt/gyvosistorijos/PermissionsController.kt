@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import kotlinx.android.synthetic.main.controller_permissions.view.*
+import lt.gyvosistorijos.ui.onboarding.OnboardingIntroController
 import lt.gyvosistorijos.utils.AppEvent
 
 class PermissionsController : Controller() {
@@ -31,7 +32,7 @@ class PermissionsController : Controller() {
         if (!locationService.areLocationPermissionsGranted()) {
             requestLocation()
         } else {
-            router.replaceTopController(RouterTransaction.with(MainController()))
+            router.replaceTopController(RouterTransaction.with(OnboardingIntroController()))
         }
 
         view.permissionsRequestButton.setOnClickListener { requestLocation() }
@@ -49,7 +50,7 @@ class PermissionsController : Controller() {
         when (requestCode) {
             REQUEST_PERMISSIONS_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    router.replaceTopController(RouterTransaction.with(MainController()))
+                    router.replaceTopController(RouterTransaction.with(OnboardingIntroController()))
                 }
             }
         }

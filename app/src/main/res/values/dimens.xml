@@ -8,4 +8,6 @@
     <dimen name="attractor_height_delta">48dp</dimen>
     <dimen name="dot_marker_padding">4dp</dimen>
     <dimen name="dot_marker_top_size">12dp</dimen>
+
+    <dimen name="map_padding">92dp</dimen>
 </resources>
