@@ -84,10 +84,16 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         val stories = StoryDb.getAll()
         map.clear()
 
-        val drawable = ContextCompat.getDrawable(activity, R.drawable.dot)
-        val icon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(drawable))
+        val storyDrawable = ContextCompat.getDrawable(activity, R.drawable.marker_story)
+        val storyVisitedDrawable = ContextCompat.getDrawable(activity, R.drawable.marker_story_visited)
+
+        val storyIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyDrawable))
+        val storyVisitedIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyVisitedDrawable))
+
+        val visitedStoryIds = StoryDb.getVisitedStories().map { it.id }.toHashSet()
 
         storyMarkers = stories.map { story ->
+            val icon = if (visitedStoryIds.contains(story.id)) storyVisitedIcon else storyIcon
             val marker = map.addMarker(MarkerOptions()
                     .icon(icon)
                     .position(LatLng(story.latitude, story.longitude)))
@@ -171,11 +177,11 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
                 LatLng(story.latitude, story.longitude))
 
         if ((distanceToStory != null &&
-                distanceToStory < MAX_DISTANCE_METERS) || BuildConfig.DEBUG) {
-            router.pushController(RouterTransaction.with(StoryController(story)))
+                distanceToStory < MAX_DISTANCE_METERS)
+                || StoryDb.isStoryVisited(story) || BuildConfig.DEBUG) {
+            showStory(story)
         } else {
-            router.pushController(
-                    RouterTransaction.with(StoryController(createTempTravelMotivationStory())))
+            showStory(null)
         }
         return true
     }
@@ -201,8 +207,17 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     internal fun clickShowStory() {
         hideShowStory()
 
-        AppEvent.trackStoryClicked(activity!!, activeStory!!.id)
-        router.pushController(RouterTransaction.with(StoryController(activeStory!!)))
+        showStory(activeStory)
+    }
+
+    private fun showStory(story: Story?) {
+        story?.let { StoryDb.setStoryVisited(it) }
+
+        val selectedStory = story ?: createTempTravelMotivationStory()
+
+        AppEvent.trackStoryClicked(activity!!, selectedStory.id)
+
+        router.pushController(RouterTransaction.with(StoryController(selectedStory)))
     }
 
     override fun onDetach(view: View) {
