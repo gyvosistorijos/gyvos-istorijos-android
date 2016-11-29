@@ -24,17 +24,17 @@ class PermissionsController : Controller() {
     }
 
     override fun onAttach(view: View) {
-        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
+        // skip permission prompt if user has already granted location permission
         val locationService = (activity as MainActivity).locationService
-
-        // Check if user has granted location permission
-        if (!locationService.areLocationPermissionsGranted()) {
-            requestLocation()
-        } else {
+        if (locationService.areLocationPermissionsGranted()) {
             router.replaceTopController(RouterTransaction.with(OnboardingIntroController()))
+            return
         }
 
+        AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
+
+        requestLocation()
         view.permissionsRequestButton.setOnClickListener { requestLocation() }
     }
 
