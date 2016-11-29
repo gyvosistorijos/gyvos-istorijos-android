@@ -1,4 +1,4 @@
-package lt.gyvosistorijos
+package lt.gyvosistorijos.storage
 
 import io.realm.Realm
 import io.realm.RealmConfiguration

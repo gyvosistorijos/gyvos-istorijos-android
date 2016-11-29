@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import lt.gyvosistorijos.MainActivity
 import lt.gyvosistorijos.R
-import lt.gyvosistorijos.StoryDb
+import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.GeofenceErrorMessages
 import timber.log.Timber

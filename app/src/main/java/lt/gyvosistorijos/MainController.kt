@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
+import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.utils.AppEvent
 import lt.gyvosistorijos.utils.addTaggedStoryMarkers
 import lt.gyvosistorijos.utils.distanceMetersTo

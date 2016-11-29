@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.controller_onboarding_intro.view.*
 import lt.gyvosistorijos.MainActivity
 import lt.gyvosistorijos.MainController
 import lt.gyvosistorijos.R
-import lt.gyvosistorijos.StoryDb
+import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.utils.AppEvent
 import lt.gyvosistorijos.utils.addTaggedStoryMarkers
 

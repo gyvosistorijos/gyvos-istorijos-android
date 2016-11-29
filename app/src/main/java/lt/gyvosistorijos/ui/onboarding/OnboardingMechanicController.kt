@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
+import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.utils.*
 
 class OnboardingMechanicController : Controller(), LocationListener {
