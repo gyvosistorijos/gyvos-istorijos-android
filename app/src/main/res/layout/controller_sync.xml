@@ -7,17 +7,12 @@
 
     <TextView
         android:id="@+id/syncRetryButton"
-        style="@style/TextAppearance.AppCompat.Title"
+        style="@style/OutlineButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="64dp"
-        android:background="@drawable/button_border_white"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="8dp"
         android:text="@string/sync_retry_cta"
         android:visibility="gone"
         tools:visibility="visible" />
