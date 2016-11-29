@@ -9,7 +9,7 @@ import lt.gyvosistorijos.entity.Story
 
 class ShowStoryPresenter {
 
-    lateinit var showStoryAnimator: ValueAnimator
+    private lateinit var showStoryAnimator: ValueAnimator
 
     fun init(container: View) {
         val imageHeight = container.resources.getDimensionPixelSize(R.dimen.image_height)

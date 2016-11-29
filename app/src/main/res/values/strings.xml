@@ -9,7 +9,11 @@
     <string name="geofence_notification_text">Visai netoli rasi įdomia istoriją</string>
     <string name="travel_to_story_cta">Nukeliauk į šią vietą ir rasi gyvą istoriją.</string>
     <string name="travel_to_story_cta_author">Kūrėjai</string>
-
+    <string name="onboarding_intro_text">Vilniuje slypi daugybė negirdėtų istorijų</string>
+    <string name="onboarding_intro_cta">Susidomėjau</string>
+    <string name="onboarding_mechanic_text">Nukeliauk į pažymėtą vietą ir spūstelk „Noriu sužinoti“</string>
+    <string name="onboarding_push_text">Programėlė tau praneš, kai netoliese slypi įdomi istorija</string>
+    <string name="onboarding_push_cta">Supratau</string>
 
     <!-- Error messages -->
     <string name="geofence_not_available">Geofence service is not available now</string>
