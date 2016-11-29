@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.controller_onboarding_intro.view.*
 import lt.gyvosistorijos.MainActivity
 import lt.gyvosistorijos.MainController
 import lt.gyvosistorijos.R
+import lt.gyvosistorijos.storage.OnboardingSharedPrefs
 import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.utils.AppEvent
 import lt.gyvosistorijos.utils.addTaggedStoryMarkers
@@ -42,7 +43,8 @@ class OnboardingPushController : Controller() {
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(54.6872, 25.2797), 11f))
 
         view.onboardingButton.setOnClickListener {
-            router.replaceTopController(RouterTransaction.with(MainController()))
+            OnboardingSharedPrefs(applicationContext!!).setOnboardingCompleted()
+            router.setBackstack(listOf(RouterTransaction.with(MainController())), null)
         }
     }
 }
