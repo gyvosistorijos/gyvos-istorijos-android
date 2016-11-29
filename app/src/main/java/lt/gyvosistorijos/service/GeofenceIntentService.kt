@@ -110,6 +110,7 @@ class GeofenceIntentService : IntentService(GeofenceIntentService.TAG) {
         builder.setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(getString(R.string.geofence_notification_text))
                 .setContentText(story.text)
+                .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setContentIntent(notificationPendingIntent).priority = NotificationCompat.PRIORITY_LOW
 
