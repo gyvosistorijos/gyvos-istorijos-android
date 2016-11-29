@@ -211,13 +211,13 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     }
 
     private fun showStory(story: Story?) {
-        if (story != null) {
-            StoryDb.setStoryVisited(story)
-            AppEvent.trackStoryClicked(activity!!, story.id)
-        }
+        story?.let { StoryDb.setStoryVisited(it) }
 
-        router.pushController(RouterTransaction.with(
-                StoryController(story ?: createTempTravelMotivationStory())))
+        val selectedStory = story ?: createTempTravelMotivationStory()
+
+        AppEvent.trackStoryClicked(activity!!, selectedStory.id)
+
+        router.pushController(RouterTransaction.with(StoryController(selectedStory)))
     }
 
     override fun onDetach(view: View) {
