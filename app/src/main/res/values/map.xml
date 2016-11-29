@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="wide_map_zoom" format="float" type="dimen">11.0</item>
+    <item name="narrow_map_zoom" format="float" type="dimen">16.0</item>
+
+</resources>

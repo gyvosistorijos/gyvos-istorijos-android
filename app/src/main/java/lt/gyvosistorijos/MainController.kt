@@ -83,7 +83,8 @@ class MainController(args: Bundle) : Controller(args), LocationListener,
         if (!zoomedIn) {
             // move the map camera to where the user location is
             val update = CameraUpdateFactory.newLatLngZoom(
-                    LatLng(location.latitude, location.longitude), 16.0f)
+                    LatLng(location.latitude, location.longitude),
+                    resources!!.getFloat(R.dimen.narrow_map_zoom))
             if (animateZoomIn) {
                 map.animateCamera(update)
             } else {

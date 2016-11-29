@@ -7,7 +7,6 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.controller_onboarding_intro.view.*
 import lt.gyvosistorijos.MainActivity
 import lt.gyvosistorijos.MainController
@@ -15,7 +14,9 @@ import lt.gyvosistorijos.R
 import lt.gyvosistorijos.storage.OnboardingSharedPrefs
 import lt.gyvosistorijos.storage.StoryDb
 import lt.gyvosistorijos.utils.AppEvent
+import lt.gyvosistorijos.utils.GeoConstants
 import lt.gyvosistorijos.utils.addTaggedStoryMarkers
+import lt.gyvosistorijos.utils.getFloat
 
 class OnboardingPushController : Controller() {
 
@@ -40,7 +41,9 @@ class OnboardingPushController : Controller() {
         map.clear()
         addTaggedStoryMarkers(view.context, map, stories)
 
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(54.6872, 25.2797), 11f))
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                GeoConstants.VILNIUS,
+                resources!!.getFloat(R.dimen.wide_map_zoom)))
 
         view.onboardingButton.setOnClickListener {
             OnboardingSharedPrefs(applicationContext!!).setOnboardingCompleted()
