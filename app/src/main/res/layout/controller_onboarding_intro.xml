@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#4000">
@@ -26,16 +25,5 @@
         android:layout_marginRight="64dp"
         android:gravity="center"
         android:text="@string/onboarding_intro_text" />
-
-    <FrameLayout
-        android:id="@+id/onboardingShowStory"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:visibility="invisible">
-
-        <include layout="@layout/layout_show_story" />
-
-    </FrameLayout>
-
 
 </RelativeLayout>
