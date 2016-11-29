@@ -1,6 +1,7 @@
 package lt.gyvosistorijos
 
 import io.realm.Realm
+import io.realm.RealmConfiguration
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.entity.VisitedStory
 import lt.gyvosistorijos.entity.realm.StoryRealm
@@ -8,10 +9,17 @@ import lt.gyvosistorijos.entity.realm.VisitedStoryRealm
 import timber.log.Timber
 import java.util.*
 
+
 object StoryDb {
 
+    val realmConfiguration: RealmConfiguration by lazy {
+        RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build()
+    }
+
     private fun <T> withRealm(func: Realm.() -> T): T {
-        return Realm.getDefaultInstance().use { func(it) }
+        return Realm.getInstance(realmConfiguration).use { func(it) }
     }
 
     fun insert(stories: List<Story>) {
