@@ -23,6 +23,7 @@ import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
+import lt.gyvosistorijos.utils.distanceMetersTo
 import timber.log.Timber
 
 class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
@@ -152,8 +153,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     override fun onMarkerClick(marker: Marker): Boolean {
         val story = marker.tag as Story
 
-        val distanceToStory = userLocation?.distanceMetersTo(
-                LatLng(story.latitude, story.longitude))
+        val distanceToStory = userLocation?.distanceMetersTo(story.latitude, story.longitude)
 
         if ((distanceToStory != null &&
                 distanceToStory < MAX_DISTANCE_METERS)
@@ -191,8 +191,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     private fun getAlpha(markerPosition: LatLng, location: Location,
                          maxDistanceMeters: Float): Float {
         return Math.max(0.5f,
-                1 - markerPosition.distanceMetersTo(
-                        LatLng(location.latitude, location.longitude)) / (2 * maxDistanceMeters))
+                1 - markerPosition.distanceMetersTo(location.latitude, location.longitude)
+                        / (2 * maxDistanceMeters))
     }
 
     private fun setGeofencingStories(stories: List<Story>) {
@@ -200,12 +200,6 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         (activity as MainActivity).geofenceHelper.setGeofenceRegions(geofenceRegions)
     }
-}
-
-private fun LatLng.distanceMetersTo(other: LatLng): Float {
-    val distance = FloatArray(1)
-    Location.distanceBetween(latitude, longitude, other.latitude, other.longitude, distance)
-    return distance[0]
 }
 
 private fun drawableToBitmap(drawable: Drawable): Bitmap {
