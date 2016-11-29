@@ -16,9 +16,7 @@ import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.storage.StoryDb
-import lt.gyvosistorijos.utils.AppEvent
-import lt.gyvosistorijos.utils.addTaggedStoryMarkers
-import lt.gyvosistorijos.utils.distanceMetersTo
+import lt.gyvosistorijos.utils.*
 import timber.log.Timber
 
 class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
@@ -62,9 +60,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         storyMarkers = addTaggedStoryMarkers(view.context, map, stories)
 
         locationService = (activity as MainActivity).locationService
-        onLocationChanged(locationService.lastLocation)
-        locationService.addLocationListener(this)
-        locationService.start()
+        locationService.attach(this)
 
         map.isMyLocationEnabled = true
 
@@ -161,8 +157,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
     override fun onDetach(view: View) {
         map.setOnMarkerClickListener(null)
-        locationService.removeLocationListener(this)
-        locationService.stop()
+        locationService.detach(this)
         showStoryPresenter.deinit()
     }
 
