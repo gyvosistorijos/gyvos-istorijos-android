@@ -6,7 +6,7 @@
     <string name="open_story_cta">Noriu sužinoti</string>
     <string name="sync_retry_cta">Bandyti iš naujo</string>
     <string name="sync_retry_rationale">Nepavyko rasti istorijų.\n\nPatikrinkite interneto ryši ir pabandykite iš naujo</string>
-    <string name="geofence_notification_text">Visai netoli rasi įdomia istoriją</string>
+    <string name="geofence_notification_text">Visai netoli rasi įdomią istoriją</string>
     <string name="travel_to_story_cta">Nukeliauk į šią vietą ir rasi gyvą istoriją.</string>
     <string name="travel_to_story_cta_author">Kūrėjai</string>
     <string name="onboarding_intro_text">Vilniuje slypi daugybė negirdėtų istorijų</string>
