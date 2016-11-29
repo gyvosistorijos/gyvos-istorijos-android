@@ -1,6 +1,5 @@
 package lt.gyvosistorijos.ui.onboarding
 
-import android.graphics.Color
 import android.location.Location
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
@@ -83,7 +82,6 @@ class OnboardingMechanicController : Controller(), LocationListener {
     }
 
     private fun showShowStory(story: Story) {
-        view!!.setBackgroundColor(Color.TRANSPARENT)
         showStoryPresenter.showShowStory(view!!, story)
 
         map.clear()
