@@ -1,6 +1,5 @@
 package lt.gyvosistorijos
 
-import android.animation.ValueAnimator
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -10,7 +9,6 @@ import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.gms.location.LocationListener
@@ -20,14 +18,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
 import timber.log.Timber
-
 
 class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
 
@@ -39,7 +35,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         }
     }
 
-    internal lateinit var showStoryAnimator: ValueAnimator
+    private val showStoryPresenter: ShowStoryPresenter = ShowStoryPresenter()
     internal lateinit var map: GoogleMap
     internal lateinit var locationService: LocationService
 
@@ -57,23 +53,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
     override fun onAttach(view: View) {
         AppEvent.trackCurrentScreen(activity!!, SCREEN_NAME)
 
-        val imageHeight = resources!!.getDimensionPixelSize(R.dimen.image_height)
-        val attractorHeightOffset =
-                resources!!.getDimensionPixelOffset(R.dimen.attractor_height_offset)
-        val attractorHeightDelta =
-                resources!!.getDimensionPixelOffset(R.dimen.attractor_height_delta)
-
-        showStoryAnimator = ValueAnimator.ofFloat(
-                (imageHeight - attractorHeightOffset - attractorHeightDelta).toFloat(),
-                (imageHeight - attractorHeightOffset).toFloat())
-        showStoryAnimator.repeatCount = ValueAnimator.INFINITE
-        showStoryAnimator.repeatMode = ValueAnimator.REVERSE
-        showStoryAnimator.interpolator = AccelerateDecelerateInterpolator()
-        showStoryAnimator.duration = 1400
-        showStoryAnimator.addUpdateListener { animation ->
-            val value = animation.animatedValue as Float
-            view.showStoryImage.translationY = value
-        }
+        showStoryPresenter.init(view)
 
         view.showStoryButton.setOnClickListener { clickShowStory() }
         view.showStoryImage.setOnClickListener { clickShowStory() }
@@ -139,7 +119,6 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         if (closestMarker == null) {
             Timber.w("No closest markers found")
-
             return
         }
 
@@ -152,12 +131,12 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         }
 
         if (null == prevActiveStory && null != activeStory) {
-            showShowStory()
+            showStoryPresenter.showShowStory(view!!, activeStory!!)
         } else if (null != prevActiveStory && null == activeStory) {
-            hideShowStory()
+            showStoryPresenter.hideShowStory(view!!)
         } else if (null != prevActiveStory && null != activeStory
                 && prevActiveStory !== activeStory) {
-            updateShowStoryButton()
+            showStoryPresenter.updateShowStoryButton(view!!, activeStory!!)
         }
     }
 
@@ -186,26 +165,8 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         return true
     }
 
-    private fun showShowStory() {
-        showStoryAnimator.start()
-        view!!.showStoryButton.visibility = View.VISIBLE
-        view!!.showStoryImage.visibility = View.VISIBLE
-        updateShowStoryButton()
-    }
-
-    private fun updateShowStoryButton() {
-        Picasso.with(activity)
-                .load(activeStory!!.url).fit().centerCrop().into(view!!.showStoryImage)
-    }
-
-    private fun hideShowStory() {
-        showStoryAnimator.cancel()
-        view!!.showStoryButton.visibility = View.INVISIBLE
-        view!!.showStoryImage.visibility = View.INVISIBLE
-    }
-
     internal fun clickShowStory() {
-        hideShowStory()
+        showStoryPresenter.hideShowStory(view!!)
 
         showStory(activeStory)
     }
@@ -224,6 +185,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
         map.setOnMarkerClickListener(null)
         locationService.removeLocationListener(this)
         locationService.stop()
+        showStoryPresenter.deinit()
     }
 
     private fun getAlpha(markerPosition: LatLng, location: Location,
