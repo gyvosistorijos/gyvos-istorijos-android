@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.utils.AppEvent
+import lt.gyvosistorijos.utils.addMarkers
 import lt.gyvosistorijos.utils.drawableToBitmap
 
 class OnboardingController : Controller(), LocationListener {
@@ -50,6 +51,10 @@ class OnboardingController : Controller(), LocationListener {
 
         map = (activity as MainActivity).map
         map.isMyLocationEnabled = true
+
+        val stories = StoryDb.getAll()
+        map.clear()
+        addMarkers(view.context, map, stories)
 
         locationService = (activity as MainActivity).locationService
         onLocationChanged(locationService.lastLocation)

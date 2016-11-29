@@ -1,7 +1,6 @@
 package lt.gyvosistorijos
 
 import android.location.Location
-import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,17 +9,15 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.gms.location.LocationListener
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.layout_show_story.view.*
 import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
+import lt.gyvosistorijos.utils.addMarkers
 import lt.gyvosistorijos.utils.distanceMetersTo
-import lt.gyvosistorijos.utils.drawableToBitmap
 import timber.log.Timber
 
 class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickListener {
@@ -61,24 +58,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         val stories = StoryDb.getAll()
         map.clear()
-
-        val storyDrawable = ContextCompat.getDrawable(activity, R.drawable.marker_story)
-        val storyVisitedDrawable = ContextCompat.getDrawable(activity, R.drawable.marker_story_visited)
-
-        val storyIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyDrawable))
-        val storyVisitedIcon = BitmapDescriptorFactory.fromBitmap(drawableToBitmap(storyVisitedDrawable))
-
-        val visitedStoryIds = StoryDb.getVisitedStories().map { it.id }.toHashSet()
-
-        storyMarkers = stories.map { story ->
-            val icon = if (visitedStoryIds.contains(story.id)) storyVisitedIcon else storyIcon
-            val marker = map.addMarker(MarkerOptions()
-                    .icon(icon)
-                    .position(LatLng(story.latitude, story.longitude)))
-            marker.tag = story
-
-            marker
-        }
+        storyMarkers = addMarkers(view.context, map, stories)
 
         locationService = (activity as MainActivity).locationService
         onLocationChanged(locationService.lastLocation)
