@@ -16,7 +16,7 @@ import lt.gyvosistorijos.entity.Story
 import lt.gyvosistorijos.location.LocationService
 import lt.gyvosistorijos.manager.RemoteConfigManager
 import lt.gyvosistorijos.utils.AppEvent
-import lt.gyvosistorijos.utils.addMarkers
+import lt.gyvosistorijos.utils.addTaggedStoryMarkers
 import lt.gyvosistorijos.utils.distanceMetersTo
 import timber.log.Timber
 
@@ -58,7 +58,7 @@ class MainController : Controller(), LocationListener, GoogleMap.OnMarkerClickLi
 
         val stories = StoryDb.getAll()
         map.clear()
-        storyMarkers = addMarkers(view.context, map, stories)
+        storyMarkers = addTaggedStoryMarkers(view.context, map, stories)
 
         locationService = (activity as MainActivity).locationService
         onLocationChanged(locationService.lastLocation)

@@ -11,7 +11,7 @@ import lt.gyvosistorijos.R
 import lt.gyvosistorijos.StoryDb
 import lt.gyvosistorijos.entity.Story
 
-fun addMarkers(context: Context, map: GoogleMap, stories: List<Story>): List<Marker> {
+fun addTaggedStoryMarkers(context: Context, map: GoogleMap, stories: List<Story>): List<Marker> {
     val storyDrawable = ContextCompat.getDrawable(context, R.drawable.marker_story)
     val storyVisitedDrawable = ContextCompat.getDrawable(context, R.drawable.marker_story_visited)
 
