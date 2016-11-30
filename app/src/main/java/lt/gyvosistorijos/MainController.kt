@@ -64,6 +64,9 @@ class MainController(args: Bundle) : Controller(args), LocationListener,
         map.setOnMarkerClickListener(this)
 
         val stories = StoryDb.getAll()
+        val visitedStoryIds = StoryDb.getVisitedStories().map { it.id }.toHashSet()
+        val unvisitedStories = stories.filterNot { visitedStoryIds.contains(it.id) }
+
         map.clear()
         storyMarkers = addTaggedStoryMarkers(view.context, map, stories)
 
@@ -72,7 +75,7 @@ class MainController(args: Bundle) : Controller(args), LocationListener,
 
         map.isMyLocationEnabled = true
 
-        setGeofencingStories(stories)
+        setGeofencingStories(unvisitedStories)
     }
 
     override fun onLocationChanged(location: Location?) {
